@@ -77,3 +77,6 @@ __pycache__/
 *.ipr
 *.iws
 out/
+
+# Remove todo.txt
+todo.txt
