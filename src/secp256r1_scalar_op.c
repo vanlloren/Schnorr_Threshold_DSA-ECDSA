@@ -12,23 +12,17 @@
 #include "secp256r1_scalar_op.h"
 #include <string.h>
 #include <stdint.h>
+#include <stdio.h>
 
-const secp256r1_scalar_native SECP256R1_Q_NATIVE =
-        SECP256R1_SCALAR_CONST(
-                0xFFFFFFFF,  /* d7 */
-                0x00000000,
-                0xFFFFFFFF,
-                0xFFFFFFFF,
-                0xBCE6FAAD,
-                0xA7179E84,
-                0xF3B9CAC2,
-                0xFC632551   /* d0 */
-        );
+const secp256r1_scalar_native SECP256R1_Q_NATIVE = { { SECP256R1_Q_WORDS } };
+const secp256r1_scalar_native SECP256R1_ONE_NATIVE = { { SECP256R1_ONE_WORDS } };
+const secp256r1_scalar_native SECP256R1_R2_NATIVE = { { SECP256R1_R2_WORDS } };
+
+
 
 /* ========================================================================
  * Utility functions for endianness conversion
  * ======================================================================== */
-
 
 void bytes_to_scalar_native(secp256r1_scalar_native *out, const unsigned char *in) {
     const int bytes_per_word = SECP256R1_SCALAR_WORD_SIZE / 8;
@@ -430,6 +424,133 @@ int secp256r1_scalar_negate(
 
     /* Serialize negated result to public format */
     if (!secp256r1_scalar_native_serialize(result, &negated)) {
+        return 0;
+    }
+
+    return 1;
+}
+
+void secp256r1_montgomery_mul(
+        secp256r1_scalar_native *result,
+        const secp256r1_scalar_native *a,
+        const secp256r1_scalar_native *b
+) {
+    /* Accumulatore x con limb extra per il carry finale (8 + 1 = 9 words) */
+    SECP256R1_SCALAR_WORD_TYPE x[SECP256R1_SCALAR_NUM_WORDS + 1] = {0};
+
+    for (int i = 0; i < SECP256R1_SCALAR_NUM_WORDS; i++) {
+        /* 1. Moltiplicazione-Accumulo della riga: x = x + a[i]*b */
+        SECP256R1_SCALAR_WORD_TYPE carry1 = 0;
+        for (int j = 0; j < SECP256R1_SCALAR_NUM_WORDS; j++) {
+            x[j] = mul_add_carry(a->d[i], b->d[j], x[j], &carry1);
+        }
+
+        /* Gestione del carry che eccede i 256 bit durante la moltiplicazione */
+        SECP256R1_SCALAR_WORD_TYPE x_n_prev = x[SECP256R1_SCALAR_NUM_WORDS];
+        SECP256R1_SCALAR_WORD_TYPE x_n_new = x_n_prev + carry1;
+        SECP256R1_SCALAR_WORD_TYPE carry_n = (x_n_new < x_n_prev) ? 1 : 0;
+
+        /* 2. Calcolo fattore di riduzione Montgomery per questa riga */
+        SECP256R1_SCALAR_WORD_TYPE t = x[0] * SECP256R1_Q_PRIME_0;
+
+        /* 3. Riduzione (passaggio di Montgomery): x = (x + t*Q) / b */
+        SECP256R1_SCALAR_WORD_TYPE carry2 = 0;
+        /* La prima operazione annulla x[0], quindi shiftiamo i risultati di un indice */
+        mul_add_carry(t, SECP256R1_Q_NATIVE.d[0], x[0], &carry2);
+
+        for (int j = 1; j < SECP256R1_SCALAR_NUM_WORDS; j++) {
+            x[j - 1] = mul_add_carry(t, SECP256R1_Q_NATIVE.d[j], x[j], &carry2);
+        }
+
+        /* 4. Consolidamento dei carry finali e completamento dello shift */
+        SECP256R1_SCALAR_WORD_TYPE sum_low = x_n_new + carry2;
+        SECP256R1_SCALAR_WORD_TYPE sum_high = (sum_low < x_n_new) ? 1 : 0;
+        sum_high += carry_n;
+
+        x[SECP256R1_SCALAR_NUM_WORDS - 1] = sum_low;
+        x[SECP256R1_SCALAR_NUM_WORDS] = sum_high;
+    }
+
+    /* 5. Riduzione Finale Condizionale (x = x >= Q ? x - Q : x) */
+    SECP256R1_SCALAR_WORD_TYPE borrow = 0;
+    secp256r1_scalar_native temp_res;
+
+    for (int i = 0; i < SECP256R1_SCALAR_NUM_WORDS; i++) {
+        SECP256R1_SCALAR_WORD_TYPE a_i = x[i];
+        SECP256R1_SCALAR_WORD_TYPE b_i = SECP256R1_Q_NATIVE.d[i];
+
+        SECP256R1_SCALAR_WORD_TYPE diff = a_i - b_i - borrow;
+
+        /* Calcolo borrow senza cast */
+        if (borrow == 0) {
+            borrow = (a_i < b_i) ? 1 : 0;
+        } else {
+            borrow = (a_i <= b_i) ? 1 : 0;
+        }
+
+        temp_res.d[i] = diff;
+    }
+
+    SECP256R1_SCALAR_WORD_TYPE x_n = x[SECP256R1_SCALAR_NUM_WORDS];
+
+    /* Decisione basata sul carry extra (x_n) e sul borrow della sottrazione */
+    if (x_n == 1 || borrow == 0) {
+        *result = temp_res;
+    } else {
+        for (int i = 0; i < SECP256R1_SCALAR_NUM_WORDS; i++) {
+            result->d[i] = x[i];
+        }
+    }
+}
+
+int secp256r1_scalar_mult(
+        secp256r1_private_secret_scalar *result,
+        const secp256r1_private_secret_scalar *scalar1,
+        const secp256r1_private_secret_scalar *scalar2
+) {
+    secp256r1_scalar_native native1, native2, product;
+
+    /* Parameter validation */
+    if (result == NULL || scalar1 == NULL || scalar2 == NULL) {
+        return 0;
+    }
+
+    /* Parse scalars to native format (validates 0 < scalar < Q) */
+    if (!secp256r1_scalar_native_parse(&native1, scalar1)) {
+        return 0;
+    }
+    if (!secp256r1_scalar_native_parse(&native2, scalar2)) {
+        return 0;
+    }
+
+    /* Convert native scalars into Montgomery form for efficient multiplication */
+    secp256r1_scalar_native native1_tilde, native2_tilde;
+
+    secp256r1_montgomery_mul(&native1_tilde, &native1, &SECP256R1_R2_NATIVE);
+    secp256r1_montgomery_mul(&native2_tilde, &native2, &SECP256R1_R2_NATIVE);
+
+    /* Perform Montgomery multiplication: product_tilde = native1_tilde * native2_tilde * R^-1 mod Q */
+    secp256r1_scalar_native product_tilde;
+    secp256r1_montgomery_mul(&product_tilde, &native1_tilde, &native2_tilde);
+
+    /* Convert product back from Montgomery form to standard representation */
+    secp256r1_montgomery_mul(&product, &product_tilde, &SECP256R1_ONE_NATIVE);
+
+    /* Check if product is zero (not allowed for secret scalars) */
+    int is_zero = 1;
+    for (int i = 0; i < SECP256R1_SCALAR_NUM_WORDS; i++) {
+        if (product.d[i] != 0) {
+            is_zero = 0;
+            break;
+        }
+    }
+
+    if (is_zero) {
+        return 0;  /* Result cannot be zero for secret scalar */
+    }
+
+    /* Serialize product back to public format */
+    if (!secp256r1_scalar_native_serialize(result, &product)) {
         return 0;
     }
 

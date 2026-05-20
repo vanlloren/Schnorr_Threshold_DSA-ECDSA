@@ -8,6 +8,7 @@
 #include "secp256r1_schnorr.h"
 
 #define SECP256R1_SCALAR_WORD_TYPE     uint32_t
+#define SECP256R1_SCALAR_HALF_WORD_TYPE uint16_t
 #define SECP256R1_SCALAR_WORD_SIZE     32
 #define SECP256R1_SCALAR_NUM_WORDS     (256 / SECP256R1_SCALAR_WORD_SIZE)
 
@@ -15,7 +16,9 @@
  * This structure is used internally for performing scalar operations,
  * and is not intended to be used directly by users of the library.
  *
- * The scalar is represented as an array of 8 32-bit unsigned integers.
+ * The scalar is represented as an array of SECP256R1_NUM_WORDS unsigned integers
+ * (32 or 64 bytes depending on SECP256R1_SCALAR_WORD_TYPE).
+ *
  * Little-endian format is used: the least significant word is stored in d[0]
  * and the most significant word is stored in d[7].
  */
@@ -23,13 +26,83 @@ typedef struct secp256r1_scalar_native {
     SECP256R1_SCALAR_WORD_TYPE d[SECP256R1_SCALAR_NUM_WORDS];
 } secp256r1_scalar_native;
 
+/** Values used in Montgomery multiplication.
+ * These constants are precomputed for the specific modulus q of secp256r1.
+ * They are used to perform efficient modular reduction in Montgomery form.
+ */
+#if (SECP256R1_SCALAR_WORD_SIZE == 32)
+#define SECP256R1_Q_PRIME_0 0xEE00BC4F
+#define SECP256R1_Q_WORDS \
+        0xFC632551, 0xF3B9CAC2, 0xA7179E84, 0xBCE6FAAD, \
+        0xFFFFFFFF, 0xFFFFFFFF, 0x00000000, 0xFFFFFFFF
+#define SECP256R1_ONE_WORDS \
+        0x00000001, 0x00000000, 0x00000000, 0x00000000, \
+        0x00000000, 0x00000000, 0x00000000, 0x00000000
+#define SECP256R1_R2_WORDS \
+        0xBE79EEA2, 0x83244C95, 0x49BD6FA6, 0x4699799C, \
+        0x2B6BEC59, 0x2845B239, 0xF3D95620, 0x66E12D94
+#elif (SECP256R1_SCALAR_WORD_SIZE == 64)
+#define SECP256R1_Q_PRIME 0x187E13645050D817ULL
+#define SECP256R1_Q_WORDS \
+        0xF3B9CAC2FC632551ULL, 0xBCE6FAADA7179E84ULL, \
+        0xFFFFFFFFFFFFFFFFULL, 0xFFFFFFFF00000000ULL
+#define SECP256R1_ONE_WORDS \
+        0x0000000000000001ULL, 0x0000000000000000ULL, \
+        0x0000000000000000ULL, 0x0000000000000000ULL
+#define SECP256R1_R2_WORDS \
+        0x83244C95BE79EEA2ULL, 0x4699799C49BD6FA6ULL, \
+        0x2845B2392B6BEC59ULL, 0x66E12D94F3D95620ULL
+#endif
+
 extern const secp256r1_scalar_native SECP256R1_Q_NATIVE;
+extern const secp256r1_scalar_native SECP256R1_ONE_NATIVE;
+extern const secp256r1_scalar_native SECP256R1_R2_NATIVE;
 
 #if defined(SECP256R1_SCALAR_WORD_TYPE) && defined(SECP256R1_SCALAR_NUM_WORDS)
 #if SECP256R1_SCALAR_NUM_WORDS == 8
 #define SECP256R1_SCALAR_CONST(d7, d6, d5, d4, d3, d2, d1, d0) {{(d0), (d1), (d2), (d3), (d4), (d5), (d6), (d7)}}
 #endif
 #endif
+
+static inline SECP256R1_SCALAR_WORD_TYPE mul_add_carry(
+        SECP256R1_SCALAR_WORD_TYPE a,
+        SECP256R1_SCALAR_WORD_TYPE b,
+        SECP256R1_SCALAR_WORD_TYPE c,
+        SECP256R1_SCALAR_WORD_TYPE *carry
+) {
+    /* Decomposing the inputs into 16-bit halves for easier handling of carries */
+    SECP256R1_SCALAR_WORD_TYPE a_lo = a & 0xFFFF, a_hi = a >> 16;
+    SECP256R1_SCALAR_WORD_TYPE b_lo = b & 0xFFFF, b_hi = b >> 16;
+    SECP256R1_SCALAR_WORD_TYPE c_lo = c & 0xFFFF, c_hi = c >> 16;
+    SECP256R1_SCALAR_WORD_TYPE cy_lo = (*carry) & 0xFFFF, cy_hi = (*carry) >> 16;
+
+    /* Computing the partial products */
+    SECP256R1_SCALAR_WORD_TYPE p0 = a_lo * b_lo;
+    SECP256R1_SCALAR_WORD_TYPE p1 = a_lo * b_hi;
+    SECP256R1_SCALAR_WORD_TYPE p2 = a_hi * b_lo;
+    SECP256R1_SCALAR_WORD_TYPE p3 = a_hi * b_hi;
+
+    /* Column 0 */
+    SECP256R1_SCALAR_WORD_TYPE col0 = (p0 & 0xFFFF) + c_lo + cy_lo;
+    SECP256R1_SCALAR_HALF_WORD_TYPE out0 = (uint16_t)(col0 & 0xFFFF);
+    SECP256R1_SCALAR_WORD_TYPE cry0 = col0 >> 16; /* Carry to column 1 */
+
+    /* Column 1 */
+    SECP256R1_SCALAR_WORD_TYPE col1 = (p0 >> 16) + (p1 & 0xFFFF) + (p2 & 0xFFFF) + c_hi + cy_hi + cry0;
+    SECP256R1_SCALAR_HALF_WORD_TYPE out1 = (uint16_t)(col1 & 0xFFFF);
+    SECP256R1_SCALAR_WORD_TYPE cry1 = col1 >> 16;
+
+
+    SECP256R1_SCALAR_WORD_TYPE col2 = (p1 >> 16) + (p2 >> 16) + (p3 & 0xFFFF) + cry1;
+    SECP256R1_SCALAR_HALF_WORD_TYPE out2 = (uint16_t)(col2 & 0xFFFF);
+    SECP256R1_SCALAR_WORD_TYPE cry2 = col2 >> 16;
+
+    SECP256R1_SCALAR_WORD_TYPE col3 = (p3 >> 16) + cry2;
+    SECP256R1_SCALAR_HALF_WORD_TYPE out3 = (uint16_t)(col3 & 0xFFFF);
+
+    *carry = ((SECP256R1_SCALAR_WORD_TYPE)out3 << 16) | (SECP256R1_SCALAR_WORD_TYPE)out2;
+    return ((SECP256R1_SCALAR_WORD_TYPE)out1 << 16) | (SECP256R1_SCALAR_WORD_TYPE)out0;
+}
 
 /** Convert a byte array in big-endian format to a scalar in native format.
  *
@@ -144,20 +217,14 @@ SECP256R1_WARN_UNUSED_RESULT int secp256r1_scalar_negate(
         const secp256r1_private_secret_scalar *scalar
 ) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2);
 
-/** Multiplies a scalar value by a constant modulo the order of the curve.
+/** Performs Montgomery multiplication of two scalars in native format.
  *
- * Returns: 0 if the arguments are invalid or the resulting scalar would be zero. 1 otherwise.
- * Out:     result: pointer to a secp256r1_private_secret_scalar to be filled with the resulting scalar.
- * In:      scalar: pointer to a secp256r1_private_secret_scalar containing the scalar value to multiply.
- *                   If the scalar is invalid according to secp256r1_schnorr_scalar_verify, this
- *                  function returns 0 and scalar will be set to some unspecified value.
- *          constant: uint32_t constant to multiply the scalar by. If the constant is zero, this function returns 0 and result is set to some unspecified value.
  */
-SECP256R1_WARN_UNUSED_RESULT int secp256r1_scalar_mul_int(
-        secp256r1_private_secret_scalar *result,
-        const secp256r1_private_secret_scalar *scalar,
-        uint8_t constant
-) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2);
+void secp256r1_montgomery_mul(
+        secp256r1_scalar_native *result,
+        const secp256r1_scalar_native *a,
+        const secp256r1_scalar_native *b
+) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2) SECP256R1_ARG_NONNULL(3);
 
 /** Multiplies a scalar value by another scalar value modulo the order of the curve.
  *
@@ -170,7 +237,7 @@ SECP256R1_WARN_UNUSED_RESULT int secp256r1_scalar_mul_int(
  *                   If the scalar is invalid according to secp256r1_schnorr_scalar_verify, this
  *                  function returns 0 and scalar2 will be set to some unspecified value.
  */
-SECP256R1_WARN_UNUSED_RESULT int secp256r1_scalar_mul(
+SECP256R1_WARN_UNUSED_RESULT int secp256r1_scalar_mult(
         secp256r1_private_secret_scalar *result,
         const secp256r1_private_secret_scalar *scalar1,
         const secp256r1_private_secret_scalar *scalar2
