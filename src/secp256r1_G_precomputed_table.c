@@ -5,7 +5,7 @@
 #include "secp256r1_G_precomputed_table.h"
 
 /********** Precomputed table for the generator G **********/
-const secp256r1_point_ge SECP256R1_PRECOMPUTED_G[SECP256R1_PRECOMPUTED_G_SIZE] = {
+const point_ge PRECOMPUTED_G[PRECOMPUTED_G_SIZE] = {
         // 1G
         {
                 .generator_index = 0, .infinity = 0,
@@ -24,7 +24,7 @@ const secp256r1_point_ge SECP256R1_PRECOMPUTED_G[SECP256R1_PRECOMPUTED_G_SIZE] =
                 .x = { 0x4EEBC127, 0xFFAC3F90, 0x087D81FB, 0xB027F84A, 0x87CBBC98, 0x66AD77DD, 0xB6FF747E, 0x26936A3F },
                 .y = { 0xC983A7EB, 0xB04C5C1F, 0x0861FE1A, 0x583E47AD, 0x1A2EE98E, 0x78820831, 0xE587CC07, 0xD5F06A29 }
         },
-        #if (SECP256R1_WINDOW_SIZE > 2)
+        #if (WINDOW_SIZE > 2)
         // 4G
         {
                 .generator_index = 0, .infinity = 0,
@@ -98,7 +98,7 @@ const secp256r1_point_ge SECP256R1_PRECOMPUTED_G[SECP256R1_PRECOMPUTED_G_SIZE] =
                 .y = { 0x6383C45D, 0x40B8524F, 0x42A41B25, 0xD7663554, 0x778A4797, 0x64EFA6DE, 0x7079ADF4, 0x2042170A }
         },
         #endif
-        #if (SECP256R1_WINDOW_SIZE > 4)
+        #if (WINDOW_SIZE > 4)
         // 16G
         {
                 .generator_index = 0, .infinity = 0,

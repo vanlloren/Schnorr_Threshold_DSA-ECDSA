@@ -2,21 +2,24 @@
 // Created by PC on 14/05/2026.
 //
 
-#ifndef SCHNORR_THRESHOLD_DSA_ECDSA_SECP256R1_G_PRECOMPUTED_TABLE_H
-#define SCHNORR_THRESHOLD_DSA_ECDSA_SECP256R1_G_PRECOMPUTED_TABLE_H
+#ifndef SCHNORR_THRESHOLD_DSA_ECDSA_G_PRECOMPUTED_TABLE_H
+#define SCHNORR_THRESHOLD_DSA_ECDSA_G_PRECOMPUTED_TABLE_H
 
-#ifndef SECP256R1_WINDOW_SIZE
-#define SECP256R1_WINDOW_SIZE 4  // default
+#include "EC_arithmetics.h"
+
+#if SECURITY_LEVEL == 128
+
+#ifndef WINDOW_SIZE
+#define WINDOW_SIZE 4  // default
 #endif
 
-#if (SECP256R1_WINDOW_SIZE != 2) && (SECP256R1_WINDOW_SIZE != 4) && (SECP256R1_WINDOW_SIZE != 8)
-#error "SECP256R1_WINDOW_SIZE value not valid! Supported: 2 (Low-Memory), 4 (Balanced), 8 (High-Performance)."
+#if (WINDOW_SIZE != 2) && (WINDOW_SIZE != 4) && (WINDOW_SIZE != 8)
+#error "WINDOW_SIZE value not valid! Supported: 2 (Low-Memory), 4 (Balanced), 8 (High-Performance)."
 #endif
 
-#define SECP256R1_PRECOMPUTED_G_SIZE ((1 << SECP256R1_WINDOW_SIZE) - 1)
+#define PRECOMPUTED_G_SIZE ((1 << WINDOW_SIZE) - 1)
 
-#include "secp256r1_EC_arithmetics.h"
+extern const point_ge PRECOMPUTED_G[PRECOMPUTED_G_SIZE];
+#endif
 
-extern const secp256r1_point_ge SECP256R1_PRECOMPUTED_G[SECP256R1_PRECOMPUTED_G_SIZE];
-
-#endif //SCHNORR_THRESHOLD_DSA_ECDSA_SECP256R1_G_PRECOMPUTED_TABLE_H
+#endif //SCHNORR_THRESHOLD_DSA_ECDSA_G_PRECOMPUTED_TABLE_H

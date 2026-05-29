@@ -2,15 +2,17 @@
 // Created by PC on 09/04/2026.
 //
 
-#ifndef SCHNORR_THRESHOLD_DSA_ECDSA_SECP256R1_GPAPI_H
-#define SCHNORR_THRESHOLD_DSA_ECDSA_SECP256R1_GPAPI_H
+#ifndef SCHNORR_THRESHOLD_DSA_ECDSA_GPAPI_H
+#define SCHNORR_THRESHOLD_DSA_ECDSA_GPAPI_H
 
 #include <stddef.h>
-#include <secp256r1_schnorr.h>
+#include <schnorr.h>
 #include "sha3.h"
 
+#if SECURITY_LEVEL == 128
 #ifndef NONCE_SIZE_BYTES
 #define NONCE_SIZE_BYTES 32
+#endif
 #endif
 
 #ifndef HASH_DIGEST_LENGTH
@@ -23,18 +25,18 @@
 
 /** Serialize a nizkp to bytes for transmission.
  *
- * Format: [generator_index(1 byte)] + [u(65 bytes)] + [c(32 bytes)] + [z(32 bytes)] + [h(65 bytes)]
+ * Format: [generator_index(1 byte)] + [u] + [c] + [z] + [h]
  *
  * Returns: 1 on success, 0 on failure.
  * Out:     output: pointer to output buffer
  * In:      output_len: pointer to an integer which is initially set to the size of output, and is overwritten with the written size
  *          nizkp: pointer to the nizkp structure to serialize
  */
-int secp256r1_nizkp_serialize(
+int nizkp_serialize(
         unsigned char *output,
         uint32_t *output_len,
-        const secp256r1_nizkp *nizkp
-) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2) SECP256R1_ARG_NONNULL(3);
+        const nizkp *nizkp
+) ARG_NONNULL(1) ARG_NONNULL(2) ARG_NONNULL(3);
 
 /** Parse a nizkp from bytes received.
  *
@@ -43,11 +45,11 @@ int secp256r1_nizkp_serialize(
  * In:      input: pointer to input buffer
  *          input_len: length of input buffer in bytes
  */
-int secp256r1_nizkp_parse(
-        secp256r1_nizkp *nizkp,
+int nizkp_parse(
+        nizkp *nizkp,
         const unsigned char *input,
         uint32_t input_len
-) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2);
+) ARG_NONNULL(1) ARG_NONNULL(2);
 
 /**
  * Serialize a recovery packet to bytes for transmission.
@@ -64,11 +66,11 @@ int secp256r1_nizkp_parse(
  * In:      output_len: pointer to uint32_t - input: buffer size, output: bytes written
  *          packet:     pointer to the recovery packet to serialize
  */
-int secp256r1_recovery_packet_serialize(
+int recovery_packet_serialize(
         unsigned char *output,
         uint32_t *output_len,
-        const secp256r1_keygen_recovery_packet *packet
-) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2) SECP256R1_ARG_NONNULL(3);
+        const keygen_recovery_packet *packet
+) ARG_NONNULL(1) ARG_NONNULL(2) ARG_NONNULL(3);
 
 /**
  * Parse a recovery packet from bytes received from a peer.
@@ -78,31 +80,31 @@ int secp256r1_recovery_packet_serialize(
  * In:      input:      pointer to input buffer
  *          input_len:  length of input buffer in bytes
  */
-int secp256r1_recovery_packet_parse(
-        secp256r1_keygen_recovery_packet *packet,
+int recovery_packet_parse(
+        keygen_recovery_packet *packet,
         const unsigned char *input,
         uint32_t input_len
-) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2);
+) ARG_NONNULL(1) ARG_NONNULL(2);
 
 /** Serialize a Shamir secret share to bytes for transmission.
  * Returns: 1 on success, 0 on failure.
- * Out:     output: pointer to output buffer that will be filled with the serialized Shamir secret share (34 bytes)
+ * Out:     output: pointer to output buffer that will be filled with the serialized Shamir secret share
  * In:      share: pointer to the Shamir secret share to serialize
  */
-int secp256r1_keygen_shamir_secret_share_serialize(
+int keygen_shamir_secret_share_serialize(
         unsigned char *output,
-        const secp256r1_keygen_shamir_secret_share *share
-) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2);
+        const keygen_shamir_secret_share *share
+) ARG_NONNULL(1) ARG_NONNULL(2);
 
 /** Parse a Shamir secret share from bytes received.
 * Returns: 1 on success, 0 on failure.
 * Out:     share: pointer to the Shamir secret share structure to fill
-* In:      input: pointer to input buffer (34 bytes) containing the serialized Shamir secret share
+* In:      input: pointer to input buffer containing the serialized Shamir secret share
 */
-int secp256r1_keygen_shamir_secret_share_parse(
-        secp256r1_keygen_shamir_secret_share *share,
+int keygen_shamir_secret_share_parse(
+        keygen_shamir_secret_share *share,
         const unsigned char *input
-) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2);
+) ARG_NONNULL(1) ARG_NONNULL(2);
 
 /** Parse a variable-length public key into the pubkey object.
 *
@@ -114,31 +116,31 @@ int secp256r1_keygen_shamir_secret_share_parse(
 *  In:   input:    pointer to a serialized public key
 *        inputlen: length of the array pointed to by input
 *
-*  This function supports parsing uncompressed (65 bytes, header byte 0x04) format public keys.
+*  This function supports parsing uncompressed format public keys.
 */
-SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorr_pubkey_parse(
-        secp256r1_schnorr_pubkey *pubkey,
+WARN_UNUSED_RESULT int schnorr_pubkey_parse(
+        schnorr_pubkey *pubkey,
         const unsigned char *input,
         uint8_t inputlen
-) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2);
+) ARG_NONNULL(1) ARG_NONNULL(2);
 
 /** Serialize a pubkey object into a serialized byte sequence.
  *
  *  Returns: 1 always.
  *  Args:
- *  Out:    output:     pointer to a 65-byte array to place the serialized key
+ *  Out:    output:     pointer to an array to place the serialized key
  *                      in.
  *  In/Out: outputlen:  pointer to an integer which is initially set to the
  *                      size of output, and is overwritten with the written
  *                      size.
- *  In:     pubkey:     pointer to a secp256r1_schnorr_pubkey containing an
+ *  In:     pubkey:     pointer to a schnorr_pubkey containing an
  *                      initialized public key.
  */
-int secp256r1_schnorr_pubkey_serialize(
+int schnorr_pubkey_serialize(
         unsigned char *output,
         uint8_t *outputlen,
-        const secp256r1_schnorr_pubkey *pubkey
-) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2) SECP256R1_ARG_NONNULL(3);
+        const schnorr_pubkey *pubkey
+) ARG_NONNULL(1) ARG_NONNULL(2) ARG_NONNULL(3);
 
 /* ========================================================================
  * Hash Functions
@@ -146,7 +148,7 @@ int secp256r1_schnorr_pubkey_serialize(
 
 /** Opaque algorithm agnostic hash call
  *
- *  Params: nonce: pointer to the nonce to hash (32 bytes) (big-endian)
+ *  Params: nonce: pointer to the nonce to hash (big-endian)
  *       m: pointer to the message to hash. (big-endian)
  *          Must be already formatted as the concatenation of relevant protocol informations.
  *          I.E. message = (len(x)||x||len(y)||y...)
@@ -264,39 +266,39 @@ void hash_spec(uint8_t digest[HASH_DIGEST_LENGTH],
 /** Generate commitment and decommitment for a given EC point.
  *
  * Returns: 1 on success, 0 on failure.
- * Out:     commitment_packet: pointer to a secp256r1_commitment_packet structure to be filled with the generated commitment and decommitment.
- * In:      point: pointer to a secp256r1_point_extended for which
+ * Out:     commitment_packet: pointer to a commitment_packet structure to be filled with the generated commitment and decommitment.
+ * In:      point: pointer to a point_extended for which
  *                 to generate the commitment and decommitment.
  *          dsc: domain separation constant to use in hashing the commitment and decommitment.
  *          csprng_state: pointer to a CSPRNG state to use for nonce generation
  */
-SECP256R1_WARN_UNUSED_RESULT int secp256r1_commit_point(
-        secp256r1_commitment_packet *commitment_packet,
-        const secp256r1_point_extended *point,
+WARN_UNUSED_RESULT int commit_point(
+        commitment_packet *commitment_packet,
+        const point_extended *point,
         const uint16_t dsc,
         CSPRNG_STATE_T *csprng_state
-) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2);
+) ARG_NONNULL(1) ARG_NONNULL(2);
 
-/** Generate commitment and decommitment for a given secp256r1_private_secret_scalar
+/** Generate commitment and decommitment for a given private_secret_scalar
  *
  * Returns: 1 on success, 0 on failure.
- * Out:     commitment_packet: pointer to a secp256r1_commitment_packet structure to be filled with the generated commitment and decommitment.
- * In:      scalar: pointer to a secp256r1_private_secret_scalar for which
+ * Out:     commitment_packet: pointer to a commitment_packet structure to be filled with the generated commitment and decommitment.
+ * In:      scalar: pointer to a private_secret_scalar for which
  *                to generate the commitment and decommitment.
  */
-SECP256R1_WARN_UNUSED_RESULT int secp256r1_commit_scalar(
-        secp256r1_commitment_packet *commitment_packet,
-        const secp256r1_private_secret_scalar *scalar,
+WARN_UNUSED_RESULT int commit_scalar(
+        commitment_packet *commitment_packet,
+        const private_secret_scalar *scalar,
         const uint16_t dsc,
         CSPRNG_STATE_T *csprng_state
-) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2);
+) ARG_NONNULL(1) ARG_NONNULL(2);
 
 /** Verify that a given scalar is uniformly random in the field,
  * by checking that it is less than the group order.
  */
-SECP256R1_WARN_UNUSED_RESULT int secp256r1_rejection_sampling_q(
+WARN_UNUSED_RESULT int rejection_sampling_q(
         const unsigned char *scalar
-) SECP256R1_ARG_NONNULL(1);
+) ARG_NONNULL(1);
 
 
-#endif //SCHNORR_THRESHOLD_DSA_ECDSA_SECP256R1_GPAPI_H
+#endif //SCHNORR_THRESHOLD_DSA_ECDSA_GPAPI_H

@@ -5,20 +5,23 @@
 #ifndef SCHNORR_THRESHOLD_DSA_ECDSA_SECP256R1_CURVEPARAMS_H
 #define SCHNORR_THRESHOLD_DSA_ECDSA_SECP256R1_CURVEPARAMS_H
 
-/* Curve paramters */
-extern const unsigned char secp256r1_p[32];
-extern const unsigned char secp256r1_a[32];
-extern const unsigned char secp256r1_b[32];
-extern const unsigned char secp256r1_G[65];
-extern const unsigned char secp256r1_q[32];     // order of the curve
-extern const unsigned int secp256r1_h;
+#include "schnorr.h"
+
+
+/* Curve parameters */
+extern const unsigned char p[SCALAR_SIZE];   // prime field modulus
+extern const unsigned char a[SCALAR_SIZE];   // curve coefficient a
+extern const unsigned char b[SCALAR_SIZE];
+extern const unsigned char G[POINT_SIZE]; // generator point in uncompressed form
+extern const unsigned char q[SCALAR_SIZE];     // order of the curve
+extern const unsigned int h;
 
 /* Other constants */
-extern const unsigned char secp256r1_p_minus_one[32];
-extern const unsigned char secp256r1_zero[32];
-extern const unsigned char secp256r1_one[32];
-extern const unsigned char secp256r1_q_minus_one[32];
-extern const unsigned char secp256r1_3_4_modq[32];
-extern const unsigned char secp256r1_1_2_modq[32];
+extern const unsigned char p_minus_one[SCALAR_SIZE];
+extern const unsigned char zero[SCALAR_SIZE];
+extern const unsigned char one[SCALAR_SIZE];
+extern const unsigned char q_minus_one[SCALAR_SIZE];
+extern const unsigned char prod_3_4_modq[SCALAR_SIZE];
+extern const unsigned char prod_1_2_modq[SCALAR_SIZE];
 
 #endif //SCHNORR_THRESHOLD_DSA_ECDSA_SECP256R1_CURVEPARAMS_H
