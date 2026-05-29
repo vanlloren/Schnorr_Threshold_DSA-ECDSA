@@ -123,7 +123,7 @@ typedef struct secp256r1_point_ge {
  */
 int secp256r1_point_ge_parse(
         secp256r1_point_ge *point,
-        secp256r1_point_extended *input
+        const secp256r1_point_extended *input
 ) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2);
 
 /** Serialize a point in affine coordinates to a secp256r1_point_extended.

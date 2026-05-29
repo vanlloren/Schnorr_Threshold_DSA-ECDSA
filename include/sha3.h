@@ -19,6 +19,7 @@
 * with Offline Recovery Party.
 ***********************************************************************/
 
+//
 
 #ifndef SCHNORR_THRESHOLD_DSA_ECDSA_SHA3_H
 #define SCHNORR_THRESHOLD_DSA_ECDSA_SHA3_H
@@ -28,6 +29,7 @@
 /* LibKeccak SHAKE Wrappers */
 
 #define SHAKE_STATE_STRUCT Keccak_HashInstance
+typedef SHAKE_STATE_STRUCT CSPRNG_STATE_T;
 
 static inline
 void xof_shake_init(SHAKE_STATE_STRUCT *state)

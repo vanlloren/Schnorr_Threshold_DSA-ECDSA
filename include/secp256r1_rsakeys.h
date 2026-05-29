@@ -44,7 +44,7 @@ int secp256r1_rsa_keypair_generate(
  */
 int secp256r1_rsa_encrypt(
         unsigned char *ciphertext,
-        EVP_PKEY *pubkey,
+        const EVP_PKEY *pubkey,
         const unsigned char *plaintext,
         size_t *out_len
 ) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2) SECP256R1_ARG_NONNULL(3) SECP256R1_ARG_NONNULL(4);

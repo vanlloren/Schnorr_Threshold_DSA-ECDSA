@@ -80,3 +80,15 @@ out/
 
 # Remove todo.txt
 todo.txt
+
+#ignore callgrind files
+callgrind.out.*
+
+#ignore der o bin files
+*.der
+*.bin
+
+#ignore executable and compiled files
+*.exe
+*.so
+*.a

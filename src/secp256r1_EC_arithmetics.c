@@ -329,7 +329,7 @@ static inline void secp256r1_field_p_sub(
 
 int secp256r1_point_ge_parse(
         secp256r1_point_ge *point,
-        secp256r1_point_extended *input
+        const secp256r1_point_extended *input
 ) {
     if (!point || !input) return 0;
 
@@ -374,6 +374,8 @@ int secp256r1_point_ge_serialize(
     secp256r1_field_p_montgomery_mul(&x_std, &point->x, &SECP256R1_P_ONE_NATIVE);
     secp256r1_field_p_montgomery_mul(&y_std, &point->y, &SECP256R1_P_ONE_NATIVE);
 
+    //set byte 0 to 0x04 to indicate uncompressed format
+    output->value[0] = 0x04;
     point_coord_native_to_bytes(&output->value[1], &x_std);
     point_coord_native_to_bytes(&output->value[33], &y_std);
 
@@ -608,62 +610,69 @@ int secp256r1_point_gej_double(
         secp256r1_point_gej *result,
         const secp256r1_point_gej *point
 ) {
+    if (!result || !point) return 0;
+
     if (point->infinity || sec_is_zero(point->Y.d)) {
         result->infinity = 1;
+        result->generator_index = point->generator_index;
         return 1;
     }
 
-    secp256r1_point_coord_native x2, y2, z2, a_z4, m, s, t;
+    // Creiamo una struttura temporanea nello stack per proteggere l'in-place
+    secp256r1_point_gej local_res;
+    local_res.generator_index = point->generator_index;
 
-    /* m = 3*X^2 + a*Z^4
-     * 'a'=-3, m = 3*(X^2 - Z^4) = 3*(X - Z^2)*(X + Z^2)
-     */
-    secp256r1_point_coord_native z2_sq, tmp1, tmp2;
-    secp256r1_field_p_montgomery_mul(&z2_sq, &point->Z, &point->Z); // Z^2
-    secp256r1_field_p_sub(&tmp1, &point->X, &z2_sq);               // (X - Z^2)
-    secp256r1_field_p_add(&tmp2, &point->X, &z2_sq);               // (X + Z^2)
-    secp256r1_field_p_montgomery_mul(&m, &tmp1, &tmp2);            // (X^2 - Z^4)
+    secp256r1_point_coord_native m, s, t;
+    secp256r1_point_coord_native z2_sq, tmp1, tmp2, y2;
+
+    /* m = 3*(X - Z^2)*(X + Z^2) */
+    secp256r1_field_p_montgomery_mul(&z2_sq, &point->Z, &point->Z);
+    secp256r1_field_p_sub(&tmp1, &point->X, &z2_sq);
+    secp256r1_field_p_add(&tmp2, &point->X, &z2_sq);
+    secp256r1_field_p_montgomery_mul(&m, &tmp1, &tmp2);
 
     /* m = 3 * m */
     tmp1 = m;
-    secp256r1_field_p_add(&m, &tmp1, &tmp1); // 2*m
-    secp256r1_field_p_add(&m, &m, &tmp1);    // 3*m
+    secp256r1_field_p_add(&m, &tmp1, &tmp1);
+    secp256r1_field_p_add(&m, &m, &tmp1);
 
     /* s = 4 * X * Y^2 */
-    secp256r1_field_p_montgomery_mul(&y2, &point->Y, &point->Y);    // Y^2
-    secp256r1_field_p_montgomery_mul(&s, &point->X, &y2);           // X * Y^2
+    secp256r1_field_p_montgomery_mul(&y2, &point->Y, &point->Y);
+    secp256r1_field_p_montgomery_mul(&s, &point->X, &y2);
     tmp1 = s;
-    secp256r1_field_p_add(&s, &tmp1, &tmp1); // 2 * X * Y^2
-    secp256r1_field_p_add(&s, &s, &s);       // 4 * X * Y^2
+    secp256r1_field_p_add(&s, &tmp1, &tmp1);
+    secp256r1_field_p_add(&s, &s, &s);
 
-    /* t = 8 * Y^4 = 2 * (2 * Y^2)^2 */
-    secp256r1_field_p_montgomery_mul(&t, &y2, &y2); // Y^4
+    /* t = 8 * Y^4 */
+    secp256r1_field_p_montgomery_mul(&t, &y2, &y2);
     tmp1 = t;
-    secp256r1_field_p_add(&t, &tmp1, &tmp1); // 2
-    secp256r1_field_p_add(&t, &t, &t);       // 4
-    secp256r1_field_p_add(&t, &t, &t);       // 8 * Y^4
+    secp256r1_field_p_add(&t, &tmp1, &tmp1);
+    secp256r1_field_p_add(&t, &t, &t);
+    secp256r1_field_p_add(&t, &t, &t);
 
     /* X3 = m^2 - 2*s */
-    secp256r1_field_p_montgomery_mul(&result->X, &m, &m);
-    secp256r1_field_p_sub(&result->X, &result->X, &s);
-    secp256r1_field_p_sub(&result->X, &result->X, &s);
+    secp256r1_field_p_montgomery_mul(&local_res.X, &m, &m);
+    secp256r1_field_p_sub(&local_res.X, &local_res.X, &s);
+    secp256r1_field_p_sub(&local_res.X, &local_res.X, &s);
 
     /* Y3 = m * (s - X3) - t */
-    secp256r1_field_p_sub(&tmp1, &s, &result->X);
-    secp256r1_field_p_montgomery_mul(&result->Y, &m, &tmp1);
-    secp256r1_field_p_sub(&result->Y, &result->Y, &t);
+    secp256r1_field_p_sub(&tmp1, &s, &local_res.X);
+    secp256r1_field_p_montgomery_mul(&local_res.Y, &m, &tmp1);
+    secp256r1_field_p_sub(&local_res.Y, &local_res.Y, &t);
 
     /* Z3 = 2 * Y * Z */
-    secp256r1_field_p_montgomery_mul(&result->Z, &point->Y, &point->Z);
-    tmp1 = result->Z;
-    secp256r1_field_p_add(&result->Z, &tmp1, &tmp1);
+    secp256r1_field_p_montgomery_mul(&local_res.Z, &point->Y, &point->Z);
+    tmp1 = local_res.Z;
+    secp256r1_field_p_add(&local_res.Z, &tmp1, &tmp1);
 
-    if (sec_is_zero(result->Z.d)) {
-        result->infinity = 1;
+    if (sec_is_zero(local_res.Z.d)) {
+        local_res.infinity = 1;
     } else {
-        result->infinity = 0;
+        local_res.infinity = 0;
     }
 
+    // Scrittura finale sull'output (ora l'operazione in-place è safe!)
+    *result = local_res;
     return 1;
 }
 
@@ -672,6 +681,8 @@ int secp256r1_point_gej_add_ge(
         const secp256r1_point_gej *point_jac,
         const secp256r1_point_ge *point_aff
 ) {
+    result->generator_index = point_jac->generator_index;
+
     if (point_jac->infinity) {
         result->X = point_aff->x;
         result->Y = point_aff->y;

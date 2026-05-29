@@ -47,13 +47,13 @@ int secp256r1_rsa_keypair_generate(EVP_PKEY **pubkey, EVP_PKEY **privkey) {
 
 int secp256r1_rsa_encrypt(
         unsigned char *ciphertext,
-        EVP_PKEY *pubkey,
+        const EVP_PKEY *pubkey,
         const unsigned char *plaintext,
         size_t *out_len
 ) {
     if (!ciphertext || !pubkey || !plaintext || !out_len) return 0;
 
-    EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new(pubkey, NULL);
+    EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new((EVP_PKEY *)pubkey, NULL);
     if (!ctx) return 0;
 
     int success = 0;

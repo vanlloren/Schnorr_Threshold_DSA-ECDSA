@@ -17,5 +17,8 @@ extern const unsigned int secp256r1_h;
 extern const unsigned char secp256r1_p_minus_one[32];
 extern const unsigned char secp256r1_zero[32];
 extern const unsigned char secp256r1_one[32];
+extern const unsigned char secp256r1_q_minus_one[32];
+extern const unsigned char secp256r1_3_4_modq[32];
+extern const unsigned char secp256r1_1_2_modq[32];
 
 #endif //SCHNORR_THRESHOLD_DSA_ECDSA_SECP256R1_CURVEPARAMS_H

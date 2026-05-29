@@ -5,9 +5,14 @@
 #ifndef SECP256R1_SCHNORR_H
 #define SECP256R1_SCHNORR_H
 
-#include "stdint.h"
-#include "stddef.h"
+#include <stdint.h>
+#include <stddef.h>
 #include "secp256r1_rsakeys.h"
+#include "rng.h"
+#include "operations_codes.h"
+#include "dsc_values.h"
+#include <sys/random.h>
+#include <openssl/evp.h>
 
 #define SECP256R1_GNUC_PREREQ(maj, min) 1
 
@@ -62,12 +67,18 @@
  */
 #define ECDSA_SCHNORR_SIGNATURE_SIZE (48)
 #define SECP256R1_MAX_COMMITMENT_SIZE (65) // Max size for committed data (e.g., uncompressed point)
-
 #define CIPHERTEXT_SIZE (384) // currently RSA 3072-bit output
+#define SECP256R1_RECOVERY_PACKET_SIZE (1 + (2 * CIPHERTEXT_SIZE) + (2 * (1 + 65 + 32 + 32 + 65)))
+#define SECP256R1_COMMITMENT_BUFFER_SIZE (32)
+#define SECP256R1_DECOMMITMENT_BUFFER_SIZE (32 + SECP256R1_MAX_COMMITMENT_SIZE + 4) // nonce + value + value_len
+#define SECP256R1_RECOVERY_INFO_BUFFER_SIZE (1 + 34 + (1 + (2 * CIPHERTEXT_SIZE) + (2 * (1 + 65 + 32 + 32 + 65))))
+#define SECP256R1_SIGNATURE_RECOVERY_INFO_BUFFER_SIZE (66 + (2 * SECP256R1_RECOVERY_PACKET_SIZE))
+#define SECP256R1_POINT_EXTENDED_BUFFER_SIZE (1 + 65) // generator_index + uncompressed point
 
 /** Private secret indexed scalar.
  *
  * Represents a private secret scalar value associated with a specific generator index.
+ * Scalars are represented using the big-endian 32-byte format.
  *
  */
 typedef struct secp256r1_private_secret_scalar {
@@ -78,7 +89,8 @@ typedef struct secp256r1_private_secret_scalar {
 /** Public point on the curve.
  *
  * Represents a public point on the secp256r1 curve associated with a specific generator index.
- * The point is stored in uncompressed format, which consists of a 0x04 prefix followed by the x and y coordinates (32 bytes each).
+ * The point is stored in uncompressed format, which consists of a 0x04 prefix
+ * followed by the x and y coordinates (32 bytes each) in big-endian format.
  */
 typedef struct secp256r1_point_extended {
     uint8_t generator_index;
@@ -130,13 +142,13 @@ typedef struct secp256r1_schnorr_seckey {
 /** Shamir polynomial.
  *
  * Represents a Shamir polynomial associated with a specific generator index.
- * The polynomial is defined by its coefficients, which are stored as two 32-byte values.
+ * The polynomial is defined by its coefficients, which are stored as two secp256r1_private_secret_scalar structures.
  * The polynomial always has a degree of 1, meaning it consists of two coefficients: the constant term and the linear term.
  */
 typedef struct secp256r1_keygen_shamir_polynomial {
     uint8_t generator_index;
-    unsigned char constant_term[32];
-    unsigned char linear_term[32];
+    secp256r1_private_secret_scalar constant_term;
+    secp256r1_private_secret_scalar linear_term;
 } secp256r1_keygen_shamir_polynomial;
 
 /** Share of the group secret key.
@@ -199,6 +211,7 @@ typedef struct secp256r1_commitment_packet {
  *     - x is the secret scalar value to prove
  */
 typedef struct secp256r1_nizkp {
+    uint8_t generator_index;
     unsigned char u[65];
     unsigned char c[32];
     unsigned char z[32];
@@ -273,6 +286,84 @@ typedef struct secp256r1_schnorr_signature {
     unsigned char s[32];
 } secp256r1_schnorr_signature;
 
+/** Context structure for the Schnorr key generation and signing protocol.
+ *
+ * This structure holds all the local data and intermediate values needed by a participant (Player I) during the execution of the Schnorr key generation and signing protocol.
+ * It includes:
+ * - RSA keys for encryption (assigned in Phase 2)
+ * - Output of each phase of the key generation protocol, including secret scalars, public points, commitments, Shamir shares, NIZKPs, and recovery information.
+ * - Parameters for control and state management during the protocol execution.
+ */
+typedef struct secp256r1_protocol_context{
+    // Chiavi RSA (assegnate nella Phase 2)
+    EVP_PKEY *rsa_pubkey;
+    EVP_PKEY *rsa_privkey;
+
+    // Output della Phase 1
+    secp256r1_private_secret_scalar sec_scalar_array[2];
+    secp256r1_keygen_shamir_secret_share sam_sec_share_y_3_i;
+    secp256r1_point_extended ec_points_array[2];
+    secp256r1_commitment_packet commitment_packets[2];
+    CSPRNG_STATE_T csprng_state;
+
+    // Output della Phase 2
+    secp256r1_keygen_shamir_secret_share sam_sec_share_array[3]; // y_{i_1}, y_{i_2}, y_{i_3}
+    secp256r1_point_extended M_i;                                // m_i * G
+    secp256r1_keygen_recovery_packet recovery_packet;            // Packet per il recovery party
+
+    //Output della Phase 3
+    secp256r1_schnorr_seckey schnorr_seckey; // chiave privata omega per le firme Schnorr
+    secp256r1_schnorr_reduced_shamir_shares schnorr_reduced_shares; // Shamir shares ridotti per la generazione della chiave privata Schnorr
+
+    //Output della Phase 4
+    secp256r1_schnorr_pubkey schnorr_pubkey; // chiave pubblica per le firme Schnorr
+    secp256r1_point_extended A_3;
+
+    //Output zkp
+    secp256r1_point_extended h;
+    secp256r1_private_secret_scalar nonce_r;
+    secp256r1_point_extended u;
+    secp256r1_private_secret_scalar nonce_c;
+    secp256r1_private_secret_scalar z;
+
+    secp256r1_point_extended h_other;
+    secp256r1_point_extended u_other;
+    secp256r1_private_secret_scalar nonce_c_other;
+    secp256r1_private_secret_scalar z_other;
+
+
+    //Output signature
+    secp256r1_private_secret_scalar nonce_k;
+    secp256r1_point_extended R_i;
+    secp256r1_schnorr_hash_challenge e;
+    secp256r1_private_secret_scalar s_i;
+    secp256r1_schnorr_signature signature;
+    secp256r1_commitment_packet s_commitment;
+    secp256r1_commitment_packet r_commitment;
+
+    unsigned char *message;
+    uint8_t message_len;
+
+    secp256r1_commitment_packet s_commitment_other;
+    secp256r1_commitment_packet r_commitment_other;
+
+
+
+    //Output recovery
+    secp256r1_schnorr_seckey schnorr_seckey_recovery;
+    secp256r1_private_secret_scalar a_3;
+    secp256r1_keygen_shamir_secret_share shamir_share_recovery[4];
+    secp256r1_schnorr_reduced_shamir_shares x_3;
+    secp256r1_signature_recovery_info recovery_info;
+
+    // Parametri di controllo locali
+    uint8_t generator_index;
+
+    //parametri di gestione di rete
+    // (es. socket, indirizzi, buffer di ricezione, etc.)
+
+} secp256r1_protocol_context;
+
 /* ========================================================================
  * Key Generation API
  * ======================================================================== */
@@ -289,13 +380,16 @@ typedef struct secp256r1_schnorr_signature {
  *                              filled with the public points corresponding to a_i, y_{3_i} for each generator index.
  *          commitment_packets: pointer to an array of secp256r1_commitment_packet structures
  *                              filled with the generated commitments and decommitments.
+ *          csprng_state:       pointer to a CSPRNG state structure to initialize with a seed for randomness generation.
  * In:      generator_index:    the index of the generator for which the key generation is being performed.
+ *
  */
 SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorr_keygen_phase1(
         secp256r1_private_secret_scalar *sec_scalar_array,
         secp256r1_keygen_shamir_secret_share *sam_sec_share,
         secp256r1_point_extended *ec_points_array,
         secp256r1_commitment_packet *commitment_packets,
+        CSPRNG_STATE_T *csprng_state,
         uint8_t generator_index
 ) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2) SECP256R1_ARG_NONNULL(3) SECP256R1_ARG_NONNULL(4);
 
@@ -306,6 +400,7 @@ SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorr_keygen_phase1(
  * Args:
  * Out:     sam_sec_share_array: pointer to an array of secp256r1_keygen_shamir_secret_share structures
  *                               filled with the evaluations of the Shamir polynomial.
+ *                               The order will be: y_{i_1}, y_{i_2}, y_{i_3} for generator index i.
  *          M_i:                 pointer to a secp256r1_point_extended structure filled
  *                               with the public point corresponding to m_i for the generator index.
           recovery_packet:       pointer to a secp256r1_keygen_recovery_packet structure filled with
@@ -326,7 +421,7 @@ SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorr_keygen_phase2(
         secp256r1_keygen_recovery_packet *recovery_packet,
         const secp256r1_private_secret_scalar *sec_scalar_array,
         const secp256r1_keygen_shamir_secret_share *sam_sec_share_y_3_i,
-        const rsa_public_key *enc_pubkey,
+        const EVP_PKEY *enc_pubkey,
         uint8_t generator_index
 ) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2) SECP256R1_ARG_NONNULL(3) SECP256R1_ARG_NONNULL(4) SECP256R1_ARG_NONNULL(5) SECP256R1_ARG_NONNULL(6);
 
@@ -337,9 +432,16 @@ SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorr_keygen_phase2(
  * Args:
  * In/Out: recovery_packet: pointer to a secp256r1_keygen_recovery_packet structure
  *                          to be filled with the NIZKPs for the generator index.
+ *         sam_sec_share_array: pointer to an array of secp256r1_keygen_shamir_secret_share structures.
+ *                          It contains y_{i_3} and y_{3_i} for the generator index.
+ *  In:      csprng_state: pointer to a CSPRNG state structure initialized with a seed for randomness generation.
+ *        generator_index: the index of the generator for which the NIZKPs are being computed.
  */
 SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorr_keygen_compute_nizkps(
-        secp256r1_keygen_recovery_packet *recovery_packet
+        secp256r1_keygen_recovery_packet *recovery_packet,
+        secp256r1_keygen_shamir_secret_share *sam_sec_share_array,
+        CSPRNG_STATE_T *csprng_state,
+        uint8_t generator_index
 ) SECP256R1_ARG_NONNULL(1);
 
 /** Verify the NIZKPs for the recovery packet of a specific generator index.
@@ -362,7 +464,8 @@ SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorr_keygen_verify_nizkps(
  * In:   y_j_i:              pointer to a secp256r1_secret_share structure containing the share y_{j_i} to verify.
  *       M_j:                pointer to a secp256r1_point_extended structure containing the public point M_j to verify.
  *       A_j:                pointer to a secp256r1_point_extended structure containing the public point A_j.
- *       generator_index:    the index of the generator for which the shares are being verified.
+ *       generator_index:    the generator_index of the user which is verifying the shares.
+ *                           I.e., to verify the shares from user 1, use generator_index = 2.
  */
 SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorr_keygen_verify_public_shares(
         const secp256r1_keygen_shamir_secret_share *y_j_i,
@@ -379,14 +482,17 @@ SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorr_keygen_verify_public_shares(
  * Args:
  * Out:     schnorr_seckey:   pointer to a secp256r1_schnorr_seckey structure to be filled
  *                           with the generated private key for the generator index.
+ *          schnorr_seckey_rec: pointer to a secp256r1_schnorr_seckey structure to be filled
+ *                              with the generated private key for the generator index to be used in the recovery phase.
  * In:      schnorr_reduced_shares: pointer to a secp256r1_schnorr_reduced_shamir_shares structure
  *          generator_index: the index of the generator for which the private key is being generated.
  */
 SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorr_keygen_generate_seckey(
         secp256r1_schnorr_seckey *schnorr_seckey,
+        secp256r1_schnorr_seckey *schnorr_seckey_rec,
         const secp256r1_schnorr_reduced_shamir_shares *schnorr_reduced_shares,
         uint8_t generator_index
-) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2);
+) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2) SECP256R1_ARG_NONNULL(3);
 
 /** Reduces a set of Shamir secret shares into a secp256r1_reduced_shamir_shares structure.
  *
@@ -397,7 +503,8 @@ SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorr_keygen_generate_seckey(
  * Args:
  * Out:     schnorr_reduced_shares: pointer to a secp256r1_schnorr_reduced_shamir_shares structure
  *          to be filled with the reduced value.
- * In:      shamir_shares_arr:  pointer to an array of secp256r1_keygen_shamir_secret_share
+ * In:      shamir_shares_arr:  pointer to an array of secp256r1_keygen_shamir_secret_share.
+ *                              Filled with y_1_i, y_2_i and y_3_i for the generator index i.
  *          share_num:      number of shares to reduce
  */
 SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorr_shamir_shares_reduction(
@@ -413,14 +520,16 @@ SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorr_shamir_shares_reduction(
  * Args:
  * Out:     u:               pointer to a secp256r1_point_extended structure to be filled
  *                           with the generated commitment R for the proof.
- *          r:               pointer to a 32-byte array to be filled with the generated nonce r for the proof.
- * In:      schnorr_seckey:  pointer to a secp256r1_schnorr_seckey structure containing the secret key for which the proof is being generated.
+ *          r:               pointer to a secp256r1_private_secret_scalar to be filled with the generated nonce r for the proof.
+ * In:      csprng_state:       pointer to a CSPRNG state structure initialized with a seed for randomness generation.
+ *         generator_index: the index of the generator for which the proof is being generated.
  *
  */
 SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorr_prove_knowledge(
         secp256r1_point_extended *u,
-        unsigned char *r,
-        const secp256r1_schnorr_seckey *schnorr_seckey
+        secp256r1_private_secret_scalar *r,
+        CSPRNG_STATE_T *csprng_state,
+        uint8_t generator_index
 ) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2) SECP256R1_ARG_NONNULL(3);
 
 /** Validates the commitment of a ZK proof and generates a random challenge for the proof.
@@ -432,29 +541,33 @@ SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorr_prove_knowledge(
  * In:      u:               pointer to a secp256r1_point_extended structure containing the commitment u for the proof.
  *          h:               pointer to a secp256r1_point_extended structure containing the point
  *                           h = G * x, where G is the generator of the curve and x is the secret scalar value to prove.
+ *          csprng_state:       pointer to a CSPRNG state structure initialized with a seed for randomness generation.
+ *          generator_index: the index of the generator for which the proof is being generated.
  */
 SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorr_generate_challenge(
         unsigned char *c,
         const secp256r1_point_extended *u,
-        const secp256r1_point_extended *h
-) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2) SECP256R1_ARG_NONNULL(3);
+        const secp256r1_point_extended *h,
+        CSPRNG_STATE_T *csprng_state,
+        uint8_t generator_index
+) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2) SECP256R1_ARG_NONNULL(3) SECP256R1_ARG_NONNULL(4);
 
 /** Generates the response for a ZK proof of knowledge of the secret key corresponding to a Schnorr public key.
  * This function computes the response z for the proof using the nonce r and the challenge c.
  *
  * Returns: 0 if the arguments are invalid or the computation fails. 1 otherwise.
  * Args:
- * Out:     z:               pointer to a 32-byte array to be filled with the generated response for the proof.
- * In:      schnorr_seckey:  pointer to a secp256r1_private_secret_scalar structure containing the secret key
+ * Out:     z:               pointer to a secp256r1_private_secret_scalar to be filled with the generated response for the proof.
+ * In:      schnorr_seckey:  pointer to a secp256r1_schnorr_reduced_shamir_shares structure containing the secret key
  *                           for which the proof is being generated.
- *          c:               pointer to a 32-byte array containing the challenge c for the proof.
- *          r:               pointer to a 32-byte array containing the nonce r for the proof.
+ *          c:               pointer to a secp256r1_private_secret_scalar containing the challenge c for the proof.
+ *          r:               pointer to a secp256r1_private_secret_scalar containing the nonce r for the proof.
  */
 SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorr_generate_response(
-        unsigned char *z,
-        const secp256r1_private_secret_scalar *schnorr_seckey,
-        const unsigned char *c,
-        const unsigned char *r
+        secp256r1_private_secret_scalar *z,
+        const secp256r1_schnorr_reduced_shamir_shares *schnorr_seckey,
+        const secp256r1_private_secret_scalar *c,
+        const secp256r1_private_secret_scalar *r
 ) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2) SECP256R1_ARG_NONNULL(3) SECP256R1_ARG_NONNULL(4);
 
 /** Validates a ZK proof of knowledge of the secret key corresponding to a Schnorr public key.
@@ -462,17 +575,17 @@ SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorr_generate_response(
  *
  * Returns: 0 if the arguments are invalid. -1 if the proof does not verify. 1 otherwise.
  * Args:
- * In:      schnorr_pubkey:  pointer to a secp256r1_point_extended structure containing the point corresponding to
+ * In:      h:              pointer to a secp256r1_point_extended structure containing the point corresponding to
  *                           the secret to prove.
  *          u:               pointer to a secp256r1_point_extended structure containing the commitment u for the proof.
  *          c:               pointer to a 32-byte array containing the challenge c for the proof.
  *          z:               pointer to a 32-byte array containing the response z for the proof.
  */
 SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorr_verify_proof(
-        const secp256r1_point_extended *schnorr_pubkey,
+        const secp256r1_point_extended *h,
         const secp256r1_point_extended *u,
-        const unsigned char *c,
-        const unsigned char *z
+        const secp256r1_private_secret_scalar *c,
+        const secp256r1_private_secret_scalar *z
 ) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2) SECP256R1_ARG_NONNULL(3) SECP256R1_ARG_NONNULL(4);
 
 /** Add a number of public keys together.
@@ -498,6 +611,7 @@ SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorr_pubkey_combine(
  * Out/In:     A_3_schnorr_pubkey: pointer to a secp256r1_schnorr_point_extended structure
  *                                 to be filled with A_3.
  *             Y_shares_array:  pointer to an array of secp256r1_point_extended structures.
+ *             It should contain the public shares Y_{3_1} and Y_{3_2}, in this order.
  */
 SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorr_A_3_compute(
         secp256r1_point_extended  *A_3_schnorr_pubkey,
@@ -519,13 +633,15 @@ SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorr_A_3_compute(
  *          commitment_packet:  pointer to a secp256r1_commitment_packet structure filled with
  *                              the generated commitment and decommitment for r_i
  * In:      generator_index:    the index of the generator for which the signing is being performed.
+ *         csprng_state:       pointer to a CSPRNG state structure initialized with a seed for randomness generation.
  */
 SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorr_sign_phase1(
         secp256r1_private_secret_scalar *sec_scalar,
         secp256r1_point_extended *r_i,
         secp256r1_commitment_packet *commitment_packet,
-        uint8_t generator_index
-) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2) SECP256R1_ARG_NONNULL(3);
+        uint8_t generator_index,
+        CSPRNG_STATE_T *csprng_state
+) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2) SECP256R1_ARG_NONNULL(3) SECP256R1_ARG_NONNULL(5);
 
 /** Second phase of Schnorr signing protocol.
  * Computes the challenge e and the response s_i for a specific generator index.
@@ -534,7 +650,7 @@ SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorr_sign_phase1(
  * Returns: 0 if the arguments are invalid or the computation fails. 1 otherwise.
  * Args:
  * Out:     schnorr_signature_chall:     pointer to a secp256r1_schnorr_hash_challenge.
- *          schnorr_signature_part_resp: pointer to a secp256r1_schnorr_response.
+ *          schnorr_signature_part_resp: pointer to a secp256r1_private_secret_scalar.
  *          commitment_packet:           pointer to a secp256r1_commitment_packet structure filled with
  *                                       the generated commitment and decommitment for s_i.
  * In:      schnorr_seckey:          pointer to a secp256r1_schnorr_seckey structure containing the secret key
@@ -542,19 +658,21 @@ SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorr_sign_phase1(
  *          sec_scalar:              pointer to a secp256r1_private_secret_scalar structure containing the scalar nonce k_i for the generator index.
  *          message:                 pointer to the message being signed.
  *          message_len:             length of the message being signed.
- *          nonce_array:             pointer to an array of secp256r1_point_extended structures containing the public nonces R.
+ *          nonce:             pointer to a of secp256r1_point_extended structure containing the public nonce R.
  *          generator_index:         the index of the generator for which the signing is being performed.
+ *          csprng_state:           pointer to a CSPRNG state structure initialized with a seed for randomness generation.
  */
 SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorr_sign_phase2(
         secp256r1_schnorr_hash_challenge *schnorr_signature_chall,
-        secp256r1_schnorr_response *schnorr_signature_part_resp,
+        secp256r1_private_secret_scalar *schnorr_signature_part_resp,
         secp256r1_commitment_packet *commitment_packet,
         const secp256r1_schnorr_seckey *schnorr_seckey,
         const secp256r1_private_secret_scalar *sec_scalar,
         const unsigned char *message,
         uint8_t message_len,
-        const secp256r1_point_extended *nonce_array,
-        uint8_t generator_index
+        const secp256r1_point_extended *nonce,
+        uint8_t generator_index,
+        CSPRNG_STATE_T *csprng_state
 ) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2) SECP256R1_ARG_NONNULL(3) SECP256R1_ARG_NONNULL(4) SECP256R1_ARG_NONNULL(5) SECP256R1_ARG_NONNULL(6) SECP256R1_ARG_NONNULL(8);
 
 /**
@@ -562,13 +680,13 @@ SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorr_sign_phase2(
  * Returns: 0 if the arguments are invalid. 1 otherwise.
  * Args:
  * Out/In: sig48: pointer to a secp256r1_schnorr_signature in compact format (48 bytes) which is updated in place to contain the combined signature.
- *         partial_resps: pointer to an array of secp256r1_schnorr_response.
+ *         partial_resps: pointer to an array of secp256r1_private_secret_scalar.
  *         n_partial_resps: the number of partial signatures in the partial_sigs array (must be at least 1).
  *         chall16: pointer to a secp256r1_hash_challenge containing the 16-byte challenge e for the signature.
  */
 SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorr_signature_combine(
         secp256r1_schnorr_signature *sig48,
-        secp256r1_schnorr_response *partial_resps,
+        secp256r1_private_secret_scalar *partial_resps,
         uint8_t n_partial_resps,
         secp256r1_schnorr_hash_challenge *chall16
 ) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2) SECP256R1_ARG_NONNULL(4);
@@ -601,13 +719,13 @@ SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorrsig_verify(
  *
  * Returns: 0 if the arguments are invalid or the computation fails. 1 otherwise.
  * Args:
- * Out:     schnorr_seckey:  pointer to a secp256r1_schnorr_seckey structure to be filled
+ * Out:     schnorr_seckey_rec:  pointer to a secp256r1_schnorr_seckey structure to be filled
  *                           with the generated private key for the generator index.
  * In:      schnorr_reduced_shares: pointer to a secp256r1_schnorr_reduced_shamir_shares structure
- *          generator_index: the index of the generator for which the private key is being generated.
+ *          generator_index: the index of the user requesting the recovery signature.
  */
 SECP256R1_WARN_UNUSED_RESULT int secp256r1_schnorr_keygen_generate_recovery_seckey(
-        secp256r1_schnorr_seckey *schnorr_seckey,
+        secp256r1_schnorr_seckey *schnorr_seckey_rec,
         const secp256r1_schnorr_reduced_shamir_shares *schnorr_reduced_shares,
         uint8_t generator_index
 ) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2);
@@ -686,10 +804,10 @@ int secp256r1_commitment_parse(
 
 /** Serialize a decommitment to bytes for transmission.
  *
- * Format: [nonce(32)] + [value(value_len bytes)] + [value_len(32 bytes)]
+ * Format: [nonce(32)] + [value(value_len bytes)] + [value_len(4 bytes)]
  *
  * Returns: 1 on success, 0 on failure.
- * Out:     output: pointer to output buffer
+ * Out:     output: pointer to output buffer, must be SECP256R1_DECOMMITMENT_BUFFER_SIZE bytes long
  * In:      output_len: pointer to an integer which is initially set to the size of output, and is overwritten with the written size
  *          decommit: pointer to the decommitment
  */
@@ -703,7 +821,7 @@ int secp256r1_decommitment_serialize(
  *
  * Returns: 1 on success, 0 on failure.
  * Out:     decommit: pointer to the decommitment structure to fill
- * In:      input: pointer to input buffer
+ * In:      input: pointer to input buffer, must be SECP256R1_DECOMMITMENT_BUFFER_SIZE bytes long
  *          input_len: length of input buffer in bytes
  */
 int secp256r1_decommitment_parse(
@@ -714,10 +832,10 @@ int secp256r1_decommitment_parse(
 
 /** Serialize a recovery info structure to bytes for transmission.
  *
- * Format: [generator_index(1 byte)] + [shamir_share(33 bytes)] + [recovery_packet(2 * CIPHERTEXT_SIZE + 2 * NIZKP_SIZE)]
+ * Format: [generator_index(1 byte)] + [shamir_share(34 bytes)] + [recovery_packet(fixed)]
  *
  * Returns: 1 on success, 0 on failure.
- * Out:     output: pointer to output buffer
+ * Out:     output: pointer to output buffer, must be SECP256R1_RECOVERY_INFO_BUFFER_SIZE bytes long
  * In:      output_len: pointer to an integer which is initially set to the size of output, and is overwritten with the written size
  *          recovery_info: pointer to the recovery info structure to serialize
  */
@@ -731,8 +849,8 @@ int secp256r1_keygen_recovery_info_serialize(
  *
  * Returns: 1 on success, 0 on failure.
  * Out:     recovery_info: pointer to the recovery info structure to fill
- * In:      input: pointer to input buffer
- *          input_len: length of input buffer in bytes
+ * In:      input: pointer to input buffer, must be SECP256R1_RECOVERY_INFO_BUFFER_SIZE bytes long
+ *          input_len: must match SECP256R1_RECOVERY_INFO_BUFFER_SIZE
  */
 int secp256r1_keygen_recovery_info_parse(
         secp256r1_keygen_recovery_info *recovery_info,
@@ -742,12 +860,12 @@ int secp256r1_keygen_recovery_info_parse(
 
 /** Serialize a signature recovery info structure to bytes for transmission.
  *
- * Format: [pubkey(33 bytes)] + [recovery_packet_1_3(2 * CIPHERTEXT_SIZE + 2 * NIZKP_SIZE)] + [recovery_packet_2_3(2 * CIPHERTEXT_SIZE + 2 * NIZKP_SIZE)]
+ * Format: [pubkey(66 bytes)] + [recovery_packet_1_3(fixed)] + [recovery_packet_2_3(fixed)]
  *
  * Returns: 1 on success, 0 on failure.
- * Out:     output: pointer to output buffer
+ * Out:     output: pointer to output buffer, must be SECP256R1_SIGNATURE_RECOVERY_INFO_BUFFER_SIZE bytes long
  * In:      output_len: pointer to an integer which is initially set to the size of output, and is overwritten with the written size
- *          recovery_info: pointer to the signature recovery info structure to serialize
+ * recovery_info: pointer to the signature recovery info structure to serialize
  */
 int secp256r1_signature_recovery_info_serialize(
         unsigned char *output,
@@ -759,8 +877,8 @@ int secp256r1_signature_recovery_info_serialize(
  *
  * Returns: 1 on success, 0 on failure.
  * Out:     recovery_info: pointer to the signature recovery info structure to fill
- * In:      input: pointer to input buffer
- *          input_len: length of input buffer in bytes
+ * In:      input: pointer to input buffer, must be SECP256R1_SIGNATURE_RECOVERY_INFO_BUFFER_SIZE bytes long
+ * input_len: length of input buffer in bytes, must match SECP256R1_SIGNATURE_RECOVERY_INFO_BUFFER_SIZE
  */
 int secp256r1_signature_recovery_info_parse(
         secp256r1_signature_recovery_info *recovery_info,
@@ -771,7 +889,8 @@ int secp256r1_signature_recovery_info_parse(
 /** Serialize a EC point in extended form to bytes for transmission.
  *
  * Returns: 1 on success, 0 on failure.
- * Out:     output: pointer to output buffer that will be filled with the serialized EC point (65 bytes)
+ * Out:     output: pointer to output buffer that will be filled with the serialized EC point.
+ *                  Must be SECP256R1_POINT_EXTENDED_BUFFER_SIZE bytes long.
  * In:      point: pointer to the EC point to serialize
  */
 int secp256r1_point_extended_serialize(
@@ -782,7 +901,8 @@ int secp256r1_point_extended_serialize(
  /** Parse a EC point in extended form from bytes received.
   * Returns: 1 on success, 0 on failure.
   * Out:     point: pointer to the EC point structure to fill
-  * In:      input: pointer to input buffer (65 bytes) containing the serialized EC point
+  * In:      input: pointer to input buffer containing the serialized EC point.
+  *                 Must be SECP256R1_POINT_EXTENDED_BUFFER_SIZE bytes long.
   */
 int secp256r1_point_extended_parse(
          secp256r1_point_extended *point,
@@ -794,7 +914,7 @@ int secp256r1_point_extended_parse(
 * Format: [generator_index (1 byte)] || [value (32 bytes big-endian)]
 *
 * Returns: 1 on success, 0 on failure.
-* Out:     output: pointer to output buffer (at least 33 bytes)
+* Out:     output: pointer to output buffer. Must be 33 bytes long.
 * In:      scalar: pointer to the scalar structure
 */
 int secp256r1_private_scalar_serialize(
@@ -808,11 +928,35 @@ int secp256r1_private_scalar_serialize(
  *
  * Returns: 1 on success, 0 on failure.
  * Out:     scalar: pointer to the scalar structure to fill
- * In:      input: pointer to input buffer (33 bytes)
+ * In:      input: pointer to input buffer. Must be 33 bytes long
  */
 int secp256r1_private_scalar_parse(
         secp256r1_private_secret_scalar *scalar,
         const unsigned char *input
 ) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2);
+
+/** Decrypt the encrypted shares in a recovery packet and fill an array of Shamir secret shares.
+ *
+ * Returns: 0 if the arguments are invalid or the decryption fails. 1 otherwise.
+ * Args:
+ * Out:     pubkey: pointer to a secp256r1_schnorr_pubkey structure containing the public key of the generator index for which the decryption is being performed.
+ *          out_share_arr: pointer to an array of secp256r1_keygen_shamir_secret_share structures
+ *                          to be filled with the decrypted shares for the generator index.
+ * In:      recovery_info: pointer to a secp256r1_keygen_recovery_packet structure containing the encrypted shares to decrypt.
+ *         enc_privkey: pointer to an RSA-3072 private key to use for decryption.
+ */
+SECP256R1_WARN_UNUSED_RESULT int secp256r1_recovery_info_decrypt(
+        secp256r1_schnorr_pubkey *pubkey,
+        secp256r1_keygen_shamir_secret_share *out_share_arr,
+        const secp256r1_signature_recovery_info *recovery_info,
+        EVP_PKEY *enc_privkey
+) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2) SECP256R1_ARG_NONNULL(3) SECP256R1_ARG_NONNULL(4);
+
+/** Collects a random seed in 32 bytes from the system
+ * Returns: 1 on success, 0 on failure.
+ */
+SECP256R1_WARN_UNUSED_RESULT int secp256r1_collect_random_seed(
+        unsigned char *seed
+) SECP256R1_ARG_NONNULL(1);
 
 #endif // SECP256R1_SCHNORR_H

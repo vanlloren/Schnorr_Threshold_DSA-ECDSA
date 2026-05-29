@@ -21,5 +21,6 @@
 #define DSC_SIGN_COMMIT_S_NONCE       0x0201
 #define DSC_SIGN_COMMIT_S             0x0202
 #define DSC_SIGN_CHALLENGE            0x0301
+#define DSC_CSPRNG_INIT               0x1000
 
 #endif //SCHNORR_THRESHOLD_DSA_ECDSA_DSC_VALUES_H

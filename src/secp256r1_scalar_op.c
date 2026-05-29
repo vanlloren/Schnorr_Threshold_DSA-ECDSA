@@ -390,16 +390,19 @@ int secp256r1_scalar_negate(
      * Implementation based on Multiple Precision Subtraction (Algorithm 1.2).
      */
     for (int i = 0; i < SECP256R1_SCALAR_NUM_WORDS; i++) {
-        /* Step 6: x_i = (A_i - B_i) mod b */
-        SECP256R1_SCALAR_WORD_TYPE diff = SECP256R1_Q_NATIVE.d[i] - native.d[i];
+        SECP256R1_SCALAR_WORD_TYPE a = SECP256R1_Q_NATIVE.d[i];
+        SECP256R1_SCALAR_WORD_TYPE b = native.d[i];
 
-        /* Step 7: tmp = (x_i - k_in) mod b */
-        SECP256R1_SCALAR_WORD_TYPE res = diff - borrow;
+        /* Compute the result word including the previous borrow */
+        SECP256R1_SCALAR_WORD_TYPE res = a - b - borrow;
 
-        /* Step 8: k_out = (x_i > A_i) + (tmp > x_i)
-         * Logical borrow detection without 64-bit casts.
+        /* * Step 8: Safe and robust branchless borrow detection.
+         * A borrow occurs if:
+         * 1) b is strictly greater than a (immediate underflow)
+         * 2) a equals b AND a previous borrow was active (forcing underflow)
+         * Using logical OR (||) strictly constrains 'borrow' to 0 or 1.
          */
-        borrow = (diff > SECP256R1_Q_NATIVE.d[i]) + (res > diff);
+        borrow = (a < b) || (a == b && borrow);
 
         /* Step 9: Save the result digit */
         negated.d[i] = res;
@@ -408,7 +411,7 @@ int secp256r1_scalar_negate(
     /* * Check if negated result is zero.
      * Note: Since 0 < native < Q, then 0 < negated < Q.
      * The result can only be zero if the input was zero, which is
-     * already filtered by secp256r1_scalar_native_parse or verify.
+     * already filtered by secp256r1_scalar_native_parse.
      */
     int is_zero = 1;
     for (int i = 0; i < SECP256R1_SCALAR_NUM_WORDS; i++) {
