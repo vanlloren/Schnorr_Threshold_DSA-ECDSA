@@ -1,4 +1,4 @@
-# Schnorr Threshold Signature Scheme (2-of-2)
+# Schnorr Threshold Signature Scheme (2-of-3)
 
 A C implementation of a Schnorr signature scheme with two participants, enabling a threshold signing protocol where both parties must collaborate to produce a valid signature.
 
@@ -6,7 +6,7 @@ A C implementation of a Schnorr signature scheme with two participants, enabling
 
 ## Overview
 
-This project implements a **2-of-2 threshold Schnorr signature scheme**, meaning that a valid signature can only be generated when both participants cooperate. Neither party alone can produce a valid signature, which provides strong security guarantees in distributed or multi-party settings.
+This project implements a **2-of-3 threshold Schnorr signature scheme**, meaning that a valid signature can only be generated when both participants cooperate. Neither party alone can produce a valid signature, which provides strong security guarantees in distributed or multi-party settings.
 
 The Schnorr signature scheme is renowned for its simplicity, efficiency, and strong security properties (provably secure under the discrete logarithm assumption in the random oracle model). The threshold extension further enhances security by eliminating any single point of failure or trust.
 
@@ -22,21 +22,21 @@ A standard Schnorr signature over a group of prime order `q` with generator `G` 
 - **Signing**: The signer picks a random nonce `k`, computes commitment `R = k·G`, computes challenge `e = H(R || message)`, and produces the response `s = k + e·x (mod q)`. The signature is `(R, s)`.
 - **Verification**: Check that `s·G == R + e·X`.
 
-### 2-of-2 Threshold Protocol
+### 2-of-3 Threshold Protocol
 
 In the two-participant variant:
 
-1. **Key generation**: Each participant `i` (for `i = 1, 2`) generates a private share `x_i` and publishes their public share `X_i = x_i·G`. The combined public key is `X = X_1 + X_2`.
+1. **Key generation**: Each participant `i` (for `i = 1, 2`) generates a private share `a_i` and publishes their public share `A_i = a_i·G`. The combined public key is `A = A_1 + A_2`.
 
-2. **Nonce commitment**: Each participant independently picks a random nonce `k_i`, computes and shares their nonce commitment `R_i = k_i·G`. The combined nonce commitment is `R = R_1 + R_2`.
+3. **Nonce commitment**: Each participant independently picks a random nonce `k_i`, computes and shares their nonce commitment `R_i = k_i·G`. The combined nonce commitment is `R = R_1 + R_2`.
 
-3. **Challenge computation**: Both participants compute the same challenge `e = H(R || message)`.
+4. **Challenge computation**: Both participants compute the same challenge `e = H(R || message)`.
 
-4. **Partial signatures**: Each participant computes their partial response `s_i = k_i + e·x_i (mod q)`.
+5. **Partial signatures**: Each participant computes their partial response `s_i = k_i + e·x_i (mod q)`.
 
-5. **Signature aggregation**: The final signature is `(R, s)` where `s = s_1 + s_2 (mod q)`.
+6. **Signature aggregation**: The final signature is `(e, s)` where `s = s_1 + s_2 (mod q)`.
 
-6. **Verification**: A standard Schnorr verification check confirms `s·G == R + e·X`.
+7. **Verification**: A standard Schnorr verification check confirms `s·G * e·A == R`.
 
 ---
 
@@ -46,9 +46,7 @@ This implementation relies on the following cryptographic libraries:
 
 ### OpenSSL
 Used for:
-- Big number arithmetic (`BN_*` functions via `<openssl/bn.h>`)
-- Elliptic curve group operations (`EC_*` functions via `<openssl/ec.h>`)
-- Cryptographic hash functions (SHA-256 via `<openssl/sha.h>`)
+- Cryptographic hash functions (SHAKE-256 via `<openssl/sha.h>`)
 - Secure random number generation (`RAND_bytes` via `<openssl/rand.h>`)
 
 **Installation (Debian/Ubuntu):**
@@ -94,7 +92,7 @@ gcc -o schnorr_threshold schnorr_threshold.c \
 
 ## Usage
 
-Run the compiled binary to execute the 2-of-2 threshold signing protocol:
+Run the compiled binary to execute the 2-of-3 threshold signing protocol:
 
 ```bash
 ./schnorr_threshold
