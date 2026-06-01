@@ -23,11 +23,17 @@ const point_coord_native P_R_MONTGOMERY = { { P_R_MONTGOMERY_WORDS } };
 const point_coord_native P_A_MONTGOMERY = { { P_A_MONTGOMERY_WORDS } };
 const point_coord_native P_A = { { P_A_WORDS } };
 
-static inline void print_hex_256(const char* label, const uint32_t* d) {
+static inline void print_hex_256(const char* label, const SCALAR_WORD_TYPE* d) {
     printf("%s: ", label);
-    // Stampiamo dalla word 7 (MSB) alla word 0 (LSB)
-    for (int i = 7; i >= 0; i--) {
-        printf("%08X", d[i]);
+    // Stampiamo dalla word più significativa (MSB) alla meno significativa (LSB)
+    for (int i = SCALAR_NUM_WORDS - 1; i >= 0; i--) {
+#if (SCALAR_WORD_SIZE == 64)
+        // Stampa a 64-bit con 16 caratteri esadecimali e padding di zeri
+        printf("%016llX", (unsigned long long)d[i]);
+#else
+        // Stampa a 32-bit con 8 caratteri esadecimali e padding di zeri
+        printf("%08X", (unsigned int)d[i]);
+#endif
     }
     printf("\n");
 }
@@ -45,10 +51,15 @@ static inline void print_hex_256(const char* label, const uint32_t* d) {
  */
 static inline void bytes_to_point_coord_native(point_coord_native *out, const unsigned char *in) {
     const int bytes_per_word = SCALAR_WORD_SIZE / 8;
-    const int scalar_size = SCALAR_NUM_WORDS * bytes_per_word;
+    // Usiamo la costante di dimensione effettiva dei byte per garantire l'allineamento Big-Endian corretto
+    const int scalar_size = SCALAR_SIZE;
 
+    // 1. Puliamo interamente la struttura di output.
+    // Garantisce che eventuali byte di padding iniziale rimangano impostati a 0 in modo sicuro.
+    memset(out, 0, sizeof(point_coord_native));
+
+    // 2. Iteriamo sulle word native del sistema
     for (int i = 0; i < SCALAR_NUM_WORDS; i++) {
-        out->d[i] = 0;
         for (int j = 0; j < bytes_per_word; j++) {
             /*
             * Index explanation:
@@ -56,8 +67,13 @@ static inline void bytes_to_point_coord_native(point_coord_native *out, const un
             * (i * bytes_per_word) moves us to the correct word.
             * j moves us within the word.
             */
-            int byte_idx = (scalar_size - 1) - (i * bytes_per_word) - j;
-            out->d[i] |= ((SCALAR_WORD_TYPE)in[byte_idx] << (8 * j));
+            int total_byte_offset = (i * bytes_per_word) + j;
+
+            // Verifichiamo di non superare la dimensione reale dei byte in input
+            if (total_byte_offset < scalar_size) {
+                int byte_idx = (scalar_size - 1) - total_byte_offset;
+                out->d[i] |= ((SCALAR_WORD_TYPE)in[byte_idx] << (8 * j));
+            }
         }
     }
 }
@@ -71,7 +87,10 @@ static inline void bytes_to_point_coord_native(point_coord_native *out, const un
  */
 static inline void point_coord_native_to_bytes(unsigned char *out, const point_coord_native *in) {
     const int bytes_per_word = SCALAR_WORD_SIZE / 8;
-    const int scalar_size = SCALAR_NUM_WORDS * bytes_per_word;
+    const int scalar_size = SCALAR_SIZE;
+
+    // Inizializziamo il buffer di output esterno a zero per pulire in sicurezza i byte iniziali (MSB)
+    memset(out, 0, scalar_size);
 
     for (int i = 0; i < SCALAR_NUM_WORDS; i++) {
         for (int j = 0; j < bytes_per_word; j++) {
@@ -81,13 +100,18 @@ static inline void point_coord_native_to_bytes(unsigned char *out, const point_c
             * Subtract the space occupied by previous words (i * bytes_per_word).
             * Subtract the offset of the current byte within the word (j).
             */
-            int byte_idx = (scalar_size - 1) - (i * bytes_per_word) - j;
+            int total_byte_offset = (i * bytes_per_word) + j;
 
-            /*
-            * Extract the j-th byte from the i-th word.
-            * Shift right by 0, 8, 16, 24... bits and mask to isolate the byte.
-             */
-            out[byte_idx] = (unsigned char)((in->d[i] >> (8 * j)) & 0xFF);
+            // Esportiamo il byte solo se rientra nella dimensione effettiva del buffer serializzato
+            if (total_byte_offset < scalar_size) {
+                int byte_idx = (scalar_size - 1) - total_byte_offset;
+
+                /*
+                * Extract the j-th byte from the i-th word.
+                * Shift right by 0, 8, 16, 24... bits and mask to isolate the byte.
+                 */
+                out[byte_idx] = (unsigned char)((in->d[i] >> (8 * j)) & 0xFF);
+            }
         }
     }
 }
@@ -131,7 +155,7 @@ void field_p_montgomery_mul(
         const point_coord_native *a,
         const point_coord_native *b
 ) {
-    /* Accumulatore x con limb extra per il carry finale (8 + 1 = 9 words) */
+    /* Accumulatore x con limb extra per il carry finale (SCALAR_NUM_WORDS + 1) */
     SCALAR_WORD_TYPE x[SCALAR_NUM_WORDS + 1] = {0};
 
     for (int i = 0; i < SCALAR_NUM_WORDS; i++) {
@@ -141,7 +165,7 @@ void field_p_montgomery_mul(
             x[j] = mul_add_carry(a->d[i], b->d[j], x[j], &carry1);
         }
 
-        /* Gestione del carry che eccede i 256 bit durante la moltiplicazione */
+        /* Gestione del carry che eccede la dimensione nativa dello scalare durante la moltiplicazione */
         SCALAR_WORD_TYPE x_n_prev = x[SCALAR_NUM_WORDS];
         SCALAR_WORD_TYPE x_n_new = x_n_prev + carry1;
         SCALAR_WORD_TYPE carry_n = (x_n_new < x_n_prev) ? 1 : 0;
@@ -149,7 +173,7 @@ void field_p_montgomery_mul(
         /* 2. Calcolo fattore di riduzione Montgomery per questa riga */
         SCALAR_WORD_TYPE t = x[0] * P_PRIME_0;
 
-        /* 3. Riduzione (passaggio di Montgomery): x = (x + t*Q) / b */
+        /* 3. Riduzione (passaggio di Montgomery): x = (x + t*P) / b */
         SCALAR_WORD_TYPE carry2 = 0;
         /* La prima operazione annulla x[0], quindi shiftiamo i risultati di un indice */
         mul_add_carry(t, P_NATIVE.d[0], x[0], &carry2);
@@ -159,15 +183,18 @@ void field_p_montgomery_mul(
         }
 
         /* 4. Consolidamento dei carry finali e completamento dello shift */
+        /* Spostiamo l'ultimo carry della riduzione (carry2) dentro il vecchio carry della moltiplicazione (x_n_new) */
         SCALAR_WORD_TYPE sum_low = x_n_new + carry2;
-        SCALAR_WORD_TYPE sum_high = (sum_low < x_n_new) ? 1 : 0;
-        sum_high += carry_n;
+        SCALAR_WORD_TYPE carry_out_low = (sum_low < x_n_new) ? 1 : 0;
+
+        /* Il carry finale dell'extralimb è la somma dei carry residui */
+        SCALAR_WORD_TYPE sum_high = carry_n + carry_out_low;
 
         x[SCALAR_NUM_WORDS - 1] = sum_low;
         x[SCALAR_NUM_WORDS] = sum_high;
     }
 
-    /* 5. Riduzione Finale Condizionale (x = x >= Q ? x - Q : x) */
+    /* 5. Riduzione Finale Condizionale (x = x >= P ? x - P : x) */
     SCALAR_WORD_TYPE borrow = 0;
     point_coord_native temp_res;
 
@@ -741,7 +768,11 @@ int point_gej_scalar_mult_base(
 
     // 2. Parametrizzazione dinamica basata sulla Window Size e sulla dimensione dello scalare
     const int bytes_per_word = SCALAR_WORD_SIZE / 8;
+#if SECURITY_LEVEL == 128
     const int scalar_bytes = SCALAR_NUM_WORDS * bytes_per_word;
+#elif SECURITY_LEVEL == 256
+    const int scalar_bytes = 66;
+#endif
 
     // Calcoliamo quante finestre (finestre di bit) ci sono in 1 byte (8 bit)
     // w=8 -> 1 | w=4 -> 2 | w=2 -> 4
@@ -819,7 +850,11 @@ int point_gej_scalar_mult(
 
     // Calcolo dinamico della dimensione dello scalare in byte
     const int bytes_per_word = SCALAR_WORD_SIZE / 8;
+#if SECURITY_LEVEL == 128
     const int scalar_bytes = SCALAR_NUM_WORDS * bytes_per_word;
+#elif SECURITY_LEVEL == 256
+    const int scalar_bytes = 66;
+#endif
 
     // Scorriamo i byte dello scalare (da MSB a LSB) - GENERALIZZATO
     for (int i = 0; i < scalar_bytes; i++) {

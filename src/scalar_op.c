@@ -437,6 +437,7 @@ int scalar_negate(
 
     /* Serialize negated result to public format */
     if (!scalar_native_serialize(result, &negated)) {
+        printf("Error: Failed to serialize negated scalar result\n");
         return 0;
     }
 

@@ -341,15 +341,15 @@ int schnorr_keygen_phase1(
 
     do {
         csprng_randombytes(sec_scalar_array[0].value, SCALAR_SIZE, csprng_state);
-    } while (!rejection_sampling_q(sec_scalar_array[0].value));
+    } while (!rejection_sampling_q(sec_scalar_array[0].value, SCALAR_SIZE));
 
     do {
         csprng_randombytes(sec_scalar_array[1].value, SCALAR_SIZE, csprng_state);
-    } while (!rejection_sampling_q(sec_scalar_array[1].value));
+    } while (!rejection_sampling_q(sec_scalar_array[1].value, SCALAR_SIZE));
 
     do {
         csprng_randombytes(sam_sec_share->value, SCALAR_SIZE, csprng_state);
-    } while (!rejection_sampling_q(sam_sec_share->value));
+    } while (!rejection_sampling_q(sam_sec_share->value, SCALAR_SIZE));
 
     // Compute EC point A_i = a_i * G
     point_gej temp_point_gej;
@@ -479,11 +479,11 @@ int schnorr_keygen_compute_nizkps(
     private_secret_scalar nonce2;
     do {
         csprng_randombytes(nonce1.value, SCALAR_SIZE, csprng_state);
-    } while (!rejection_sampling_q(nonce1.value));
+    } while (!rejection_sampling_q(nonce1.value, SCALAR_SIZE));
 
     do {
         csprng_randombytes(nonce2.value, SCALAR_SIZE, csprng_state);
-    } while(!rejection_sampling_q(nonce2.value));
+    } while(!rejection_sampling_q(nonce2.value, SCALAR_SIZE));
 
     // convert y_{i_3} and y_{3_i} to points H1 and H2
     point_extended h1;
@@ -597,19 +597,21 @@ int schnorr_keygen_compute_nizkps(
     // compute c1 and c2
     uint8_t c1[SCALAR_SIZE];
     uint8_t c2[SCALAR_SIZE];
+    memset(c1, 0, SCALAR_SIZE);
+    memset(c2, 0, SCALAR_SIZE);
 
     // perform hash until digest is modulo q
     uint8_t counter = 0;
     do{
-        hash_plain(c1, message1, dim, DSC_NIZKP_HASH, counter);
+        hash_plain(&c1[SCALAR_SIZE-HASH_DIGEST_LENGTH], message1, dim, DSC_NIZKP_HASH, counter);
         counter++;
-    } while (!rejection_sampling_q(c1));
+    } while (!rejection_sampling_q(c1, SCALAR_SIZE));
 
     counter = 0;
     do{
-        hash_plain(c2, message2, dim, DSC_NIZKP_HASH, counter);
+        hash_plain(&c2[SCALAR_SIZE-HASH_DIGEST_LENGTH], message2, dim, DSC_NIZKP_HASH, counter);
         counter++;
-    } while (!rejection_sampling_q(c2));
+    } while (!rejection_sampling_q(c2, SCALAR_SIZE));
 
     // compute z1 and z2
     private_secret_scalar z1;
@@ -789,18 +791,20 @@ int schnorr_keygen_verify_nizkps(
     // recompute c1 and c2
     uint8_t recomputed_c1[SCALAR_SIZE];
     uint8_t recomputed_c2[SCALAR_SIZE];
+    memset(recomputed_c1, 0, SCALAR_SIZE);
+    memset(recomputed_c2, 0, SCALAR_SIZE);
 
     uint8_t counter = 0;
     do {
-        hash_plain(recomputed_c1, message1, dim, DSC_NIZKP_HASH, counter);
+        hash_plain(&recomputed_c1[SCALAR_SIZE-HASH_DIGEST_LENGTH], message1, dim, DSC_NIZKP_HASH, counter);
         counter++;
-    } while (!rejection_sampling_q(recomputed_c1));
+    } while (!rejection_sampling_q(recomputed_c1, SCALAR_SIZE));
 
     counter = 0;
     do {
-        hash_plain(recomputed_c2, message2, dim, DSC_NIZKP_HASH, counter);
+        hash_plain(&recomputed_c2[SCALAR_SIZE-HASH_DIGEST_LENGTH], message2, dim, DSC_NIZKP_HASH, counter);
         counter++;
-    } while (!rejection_sampling_q(recomputed_c2));
+    } while (!rejection_sampling_q(recomputed_c2, SCALAR_SIZE));
 
     if (memcmp(recomputed_c1, recovery_packet->nizkp_y_i3.c, SCALAR_SIZE) != 0 || memcmp(recomputed_c2, recovery_packet->nizkp_y_3i.c, SCALAR_SIZE) != 0) {
         return -1;
@@ -1111,7 +1115,7 @@ int schnorr_prove_knowledge(
     // generate a random nonce in r
     do {
         csprng_randombytes(r->value, SCALAR_SIZE, csprng_state);
-    } while (!rejection_sampling_q(r->value));
+    } while (!rejection_sampling_q(r->value, SCALAR_SIZE));
     r->generator_index = generator_index;
 
     // compute u = r * G
@@ -1168,7 +1172,7 @@ int schnorr_generate_challenge(
     //generate random nonce c
     do {
         csprng_randombytes(c, SCALAR_SIZE, csprng_state);
-    } while (!rejection_sampling_q(c));
+    } while (!rejection_sampling_q(c, SCALAR_SIZE));
 
     return 1;
 }
@@ -1250,7 +1254,7 @@ int schnorr_sign_phase1(
     // generate a random nonce in sec_scalar
     do {
         csprng_randombytes(sec_scalar->value, SCALAR_SIZE, csprng_state);
-    } while (!rejection_sampling_q(sec_scalar->value));
+    } while (!rejection_sampling_q(sec_scalar->value, SCALAR_SIZE));
     sec_scalar->generator_index = generator_index;
 
     // compute r_i = sec_scalar * G
@@ -1287,10 +1291,10 @@ int schnorr_sign_phase2(
         CSPRNG_STATE_T *csprng_state
 ){
     // tmp for storing 32 bytes hash output
-    unsigned char tmp_hash[32];
+    unsigned char tmp_hash[HASH_DIGEST_LENGTH];
 
     // tmp for storing r_x
-    unsigned char r_x[HALF_POINT_SIZE];
+    unsigned char r_x[SCALAR_SIZE];
     memcpy(r_x, &nonce->value[1], SCALAR_SIZE);
 
     //generate challenge c = H(r_x || message) with rejection sampling
@@ -1298,7 +1302,7 @@ int schnorr_sign_phase2(
     do {
         hash_spec(tmp_hash, r_x, message, message_len, DSC_SIGN_CHALLENGE, counter);
         counter++;
-    } while (!rejection_sampling_q(tmp_hash));
+    } while (!rejection_sampling_q(tmp_hash, HASH_DIGEST_LENGTH));
 
     unsigned char *tmp_chall;
 
@@ -1311,6 +1315,9 @@ int schnorr_sign_phase2(
         memset(tmp_chall, 0, 32);
         memcpy(&tmp_chall[16], schnorr_signature_chall, 16);
     }else{
+        // signature challenge is 32 bytes, directly use tmp_hash as the challenge
+        memcpy(schnorr_signature_chall, tmp_hash, ECDSA_SCHNORR_SIGNATURE_E_SIZE);
+
         tmp_chall = (unsigned char *)malloc(SCALAR_SIZE);
         memset(tmp_chall, 0, SCALAR_SIZE);
         memcpy(&tmp_chall[SCALAR_SIZE-ECDSA_SCHNORR_SIGNATURE_E_SIZE], schnorr_signature_chall, ECDSA_SCHNORR_SIGNATURE_E_SIZE);
@@ -1420,27 +1427,18 @@ int schnorrsig_verify(
     }
 
     //generate challenge c' = H(verify_nonce || msg) with rejection sampling
-    unsigned char tmp_hash[32];
+    unsigned char tmp_hash[HASH_DIGEST_LENGTH];
     uint8_t counter = 0;
-    unsigned char r_x [HALF_POINT_SIZE];
+    unsigned char r_x [SCALAR_SIZE];
     memcpy(r_x, &verify_nonce.value[1], SCALAR_SIZE);
 
     do {
         hash_spec(tmp_hash, r_x, msg, msglen, DSC_SIGN_CHALLENGE, counter);
         counter++;
-    } while (!rejection_sampling_q(tmp_hash));
+    } while (!rejection_sampling_q(tmp_hash, HASH_DIGEST_LENGTH));
 
-    unsigned char *recomputed_chall;
-
-    if(ECDSA_SCHNORR_SIGNATURE_E_SIZE == 16) {
-        //reduced challenge is the first 16 bytes of tmp_hash
-        recomputed_chall = (unsigned char *) malloc(ECDSA_SCHNORR_SIGNATURE_E_SIZE);
-        memcpy(recomputed_chall, tmp_hash, ECDSA_SCHNORR_SIGNATURE_E_SIZE);
-    } else {
-        recomputed_chall = (unsigned char *) malloc(ECDSA_SCHNORR_SIGNATURE_E_SIZE);
-        memcpy(recomputed_chall, &tmp_hash[SCALAR_SIZE - ECDSA_SCHNORR_SIGNATURE_E_SIZE], ECDSA_SCHNORR_SIGNATURE_E_SIZE);
-    }
-
+    unsigned char recomputed_chall[ECDSA_SCHNORR_SIGNATURE_E_SIZE];
+    memcpy(recomputed_chall, tmp_hash, ECDSA_SCHNORR_SIGNATURE_E_SIZE);
 
     printf("Recomputed challenge: ");
     // compare recomputed_chall with sig->e
@@ -1585,11 +1583,11 @@ int schnorr_verify_commitment(
         m_cursor += 8;
         memcpy(m_cursor, commitment_packet->decommitment.value, SCALAR_SIZE);
 
-        unsigned char hash_digest[32];
+        unsigned char hash_digest[HASH_DIGEST_LENGTH];
         uint8_t counter = 1;
         hash(hash_digest, commitment_packet->decommitment.nonce, m, SCALAR_SIZE+8, DSC_SIGN_COMMIT_S, counter);
 
-        if (memcmp(hash_digest, commitment_packet->commitment.data, 32) != 0) {
+        if (memcmp(hash_digest, commitment_packet->commitment.data, HASH_DIGEST_LENGTH) != 0) {
             return 0;
         }
     }else if (commitment_packet->decommitment.value_len == POINT_SIZE) {
@@ -1608,16 +1606,15 @@ int schnorr_verify_commitment(
         m_cursor += 8;
         memcpy(m_cursor, &commitment_packet->decommitment.value[1+SCALAR_SIZE], SCALAR_SIZE);
 
-        unsigned char hash_digest_1[32]; //using dsc = DSC_KEYGEN_COMMIT
-        unsigned char hash_digest_2[32]; //using dsc = DSC_SIGN_COMMIT_R
+        unsigned char hash_digest_1[HASH_DIGEST_LENGTH]; //using dsc = DSC_KEYGEN_COMMIT
+        unsigned char hash_digest_2[HASH_DIGEST_LENGTH]; //using dsc = DSC_SIGN_COMMIT_R
         uint8_t counter = 1;
-
 
         hash(hash_digest_1, commitment_packet->decommitment.nonce, m, SCALAR_SIZE*2+16, DSC_KEYGEN_COMMIT, counter);
         hash(hash_digest_2, commitment_packet->decommitment.nonce, m, SCALAR_SIZE*2+16, DSC_SIGN_COMMIT_R, counter);
 
-        if (memcmp(hash_digest_1, commitment_packet->commitment.data, 32) != 0 &&
-            memcmp(hash_digest_2, commitment_packet->commitment.data, 32) != 0) {
+        if (memcmp(hash_digest_1, commitment_packet->commitment.data, HASH_DIGEST_LENGTH) != 0 &&
+            memcmp(hash_digest_2, commitment_packet->commitment.data, HASH_DIGEST_LENGTH) != 0) {
             return 0;
         }
     }

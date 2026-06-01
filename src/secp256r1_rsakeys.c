@@ -94,7 +94,7 @@ int secp256r1_rsa_decrypt(
     if (EVP_PKEY_decrypt(ctx, temp_out, &out_len, ciphertext, RSA3072_CIPHERTEXT_SIZE) <= 0) goto err;
     if (out_len != RSA3072_PLAINTEXT_SIZE) goto err;
 
-    memcpy(plaintext, temp_out, RSA3072_PLAINTEXT_SIZE);
+    memcpy(plaintext, temp_out, out_len);
 
     success = 1;
 

@@ -219,7 +219,7 @@ int commit_point(
     int valid = 0;
 
     while (!valid) {
-        csprng_randombytes(nonce.value, SCALAR_SIZE, csprng_state);
+        csprng_randombytes(nonce.value, NONCE_SIZE_BYTES, csprng_state);
         if (scalar_verify(&nonce)) {
             valid = 1;
         }
@@ -232,20 +232,20 @@ int commit_point(
     memcpy(m_cursor, &x_len_le, 8);
     m_cursor += 8;
     memcpy(m_cursor, &(point->value[1]), SCALAR_SIZE);
-    m_cursor += 32;
+    m_cursor += SCALAR_SIZE;
 
     uint64_t y_len_le = SCALAR_SIZE;
     memcpy(m_cursor, &y_len_le, 8);
     m_cursor += 8;
     memcpy(m_cursor, &(point->value[1+SCALAR_SIZE]), SCALAR_SIZE);
 
-    unsigned char hash_digest[32];
+    unsigned char hash_digest[HASH_DIGEST_LENGTH];
     uint8_t counter = 1;
 
     hash(hash_digest, nonce.value, m, SCALAR_SIZE *2 + 16, dsc, counter);
 
     commitment_packet->generator_index = point->generator_index;
-    memcpy(commitment_packet->commitment.data, hash_digest, 32);
+    memcpy(commitment_packet->commitment.data, hash_digest, HASH_DIGEST_LENGTH);
     memcpy(commitment_packet->decommitment.nonce, nonce.value, SCALAR_SIZE);
 
     if (POINT_SIZE > MAX_COMMITMENT_SIZE) {
@@ -268,7 +268,7 @@ int commit_scalar(
     int valid = 0;
 
     while (!valid) {
-        csprng_randombytes(nonce.value, 32, csprng_state);
+        csprng_randombytes(nonce.value, NONCE_SIZE_BYTES, csprng_state);
         if (scalar_verify(&nonce)) {
             valid = 1;
         }
@@ -282,12 +282,12 @@ int commit_scalar(
     m_cursor += 8;
     memcpy(m_cursor, scalar->value, SCALAR_SIZE);
 
-    unsigned char hash_digest[32];
+    unsigned char hash_digest[HASH_DIGEST_LENGTH];
     uint8_t counter = 1;
     hash(hash_digest, nonce.value, m, SCALAR_SIZE+8, dsc, counter);
 
     commitment_packet->generator_index = scalar->generator_index;
-    memcpy(commitment_packet->commitment.data, hash_digest, 32);
+    memcpy(commitment_packet->commitment.data, hash_digest, HASH_DIGEST_LENGTH);
     memcpy(commitment_packet->decommitment.nonce, nonce.value, SCALAR_SIZE);
 
     if (SCALAR_SIZE > MAX_COMMITMENT_SIZE) {
@@ -300,25 +300,29 @@ int commit_scalar(
     return 1;
 }
 
-int rejection_sampling_q(const unsigned char *scalar) {
-    if (memcmp(scalar, zero, SCALAR_SIZE) == 0) {
+int rejection_sampling_q(const unsigned char *scalar, uint32_t scalar_len) {
+    unsigned char scalar_right_length[SCALAR_SIZE];
+    memset(scalar_right_length, 0, SCALAR_SIZE);
+    memcpy(&scalar_right_length[SCALAR_SIZE - scalar_len], scalar, HASH_DIGEST_LENGTH);
+
+    if (memcmp(scalar_right_length, zero, SCALAR_SIZE) == 0) {
         return 0;
     }
-    if (memcmp(scalar, one, SCALAR_SIZE) == 0) {
+    if (memcmp(scalar_right_length, one, SCALAR_SIZE) == 0) {
         return 0;
     }
-    if (memcmp(scalar, q_minus_one, SCALAR_SIZE) == 0) {
+    if (memcmp(scalar_right_length, q_minus_one, SCALAR_SIZE) == 0) {
         return 0;
     }
-    if (memcmp(scalar, q, SCALAR_SIZE) == 0) {
+    if (memcmp(scalar_right_length, q, SCALAR_SIZE) == 0) {
         return 0;
     }
 
     for (int i = 0; i < SCALAR_SIZE; i++) {
-        if (scalar[i] > q[i]) {
+        if (scalar_right_length[i] > q[i]) {
             return 0;
         }
-        if (scalar[i] < q[i]) {
+        if (scalar_right_length[i] < q[i]) {
             break;
         }
     }

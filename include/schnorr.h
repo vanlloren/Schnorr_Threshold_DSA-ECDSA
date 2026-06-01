@@ -80,15 +80,15 @@
 #define SCALAR_SIZE (32)
 #define POINT_SIZE (65)
 #define HALF_POINT_SIZE (33) // for x-only representation
-#define MAX_COMMITMENT_SIZE (65) // Max size for committed data (e.g., uncompressed point)
+#define MAX_COMMITMENT_SIZE (POINT_SIZE) // Max size for committed data (e.g., uncompressed point)
 #define CIPHERTEXT_SIZE (384) // currently RSA 3072-bit output
-#define RECOVERY_PACKET_SIZE (1 + (2 * CIPHERTEXT_SIZE) + (2 * (1 + 65 + 32 + 32 + 65)))
+#define RECOVERY_PACKET_SIZE (1 + (2 * CIPHERTEXT_SIZE) + (2 * (1 + POINT_SIZE + SCALAR_SIZE + SCALAR_SIZE + POINT_SIZE)))
 #define COMMITMENT_BUFFER_SIZE (32)
 #define SCALAR_BUFFER_SIZE (33)
-#define DECOMMITMENT_BUFFER_SIZE (32 + MAX_COMMITMENT_SIZE + 4) // nonce + value + value_len
-#define RECOVERY_INFO_BUFFER_SIZE (1 + 34 + (1 + (2 * CIPHERTEXT_SIZE) + (2 * (1 + 65 + 32 + 32 + 65))))
+#define DECOMMITMENT_BUFFER_SIZE (SCALAR_SIZE + MAX_COMMITMENT_SIZE + 4) // nonce + value + value_len
+#define RECOVERY_INFO_BUFFER_SIZE (1 + 34 + (1 + (2 * CIPHERTEXT_SIZE) + (2 * (1 + POINT_SIZE + SCALAR_SIZE + SCALAR_SIZE + POINT_SIZE))))
 #define SIGNATURE_RECOVERY_INFO_BUFFER_SIZE (1 + POINT_SIZE + (2 * RECOVERY_PACKET_SIZE))
-#define POINT_EXTENDED_BUFFER_SIZE (1 + 65) // generator_index + uncompressed point
+#define POINT_EXTENDED_BUFFER_SIZE (1 + POINT_SIZE) // generator_index + uncompressed point
 
 #elif SECURITY_LEVEL == 256
 #define ECDSA_SCHNORR_SIGNATURE_SIZE (98) // 32 bytes for e and 66 bytes for s
@@ -96,15 +96,15 @@
 #define SCALAR_SIZE (66)
 #define POINT_SIZE (1 + 66 + 66) // generator_index + uncompressed point
 #define HALF_POINT_SIZE (1 + 66) // generator_index + x-only point
-#define MAX_COMMITMENT_SIZE (1+66+66) // Max size for committed data (e.g., uncompressed point)
+#define MAX_COMMITMENT_SIZE (POINT_SIZE) // Max size for committed data (e.g., uncompressed point)
 #define CIPHERTEXT_SIZE (384) // currently RSA 3072-bit output  ->>>> TO MODIFY
-#define RECOVERY_PACKET_SIZE (1 + (2 * CIPHERTEXT_SIZE) + (2 * (1 + (1+66+66) + 66 + 66 + (1+66+66))))
-#define COMMITMENT_BUFFER_SIZE (32)
+#define RECOVERY_PACKET_SIZE (1 + (2 * CIPHERTEXT_SIZE) + (2 * (1 + (POINT_SIZE) + SCALAR_SIZE + SCALAR_SIZE + (POINT_SIZE))))
+#define COMMITMENT_BUFFER_SIZE (64)
 #define SCALAR_BUFFER_SIZE (67)
-#define DECOMMITMENT_BUFFER_SIZE (66 + MAX_COMMITMENT_SIZE + 4) // nonce + value + value_len
-#define RECOVERY_INFO_BUFFER_SIZE (1 + 66 + (1 + (2 * CIPHERTEXT_SIZE) + (2 * (1 + (1+66+66) + 66 + 66 + (1+66+66)))))
+#define DECOMMITMENT_BUFFER_SIZE (SCALAR_SIZE + MAX_COMMITMENT_SIZE + 4) // nonce + value + value_len
+#define RECOVERY_INFO_BUFFER_SIZE (1 + 2 + 66 + (1 + (2 * CIPHERTEXT_SIZE) + (2 * (1 + (POINT_SIZE) + SCALAR_SIZE + SCALAR_SIZE + (POINT_SIZE)))))
 #define SIGNATURE_RECOVERY_INFO_BUFFER_SIZE (1 + POINT_SIZE + (2 * RECOVERY_PACKET_SIZE))
-#define POINT_EXTENDED_BUFFER_SIZE (1 + 1 + 66 + 66) // generator_index + uncompressed point
+#define POINT_EXTENDED_BUFFER_SIZE (1 + POINT_SIZE) // generator_index + uncompressed point
 #endif
 
 

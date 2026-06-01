@@ -7,11 +7,10 @@
 
 #include "schnorr.h"
 
-
 #if (SECURITY_LEVEL == 128)
 #define SCALAR_TOTAL_BITS    256
 #elif (SECURITY_LEVEL == 256)
-#define SCALAR_TOTAL_BITS    521
+#define SCALAR_TOTAL_BITS    576
 #else
     #error "SECURITY_LEVEL non supportato! Scegliere 128 (per 256 bit) o 256 (per 521 bit)."
 #endif
@@ -22,6 +21,7 @@
     #define SCALAR_HALF_WORD_TYPE     uint32_t
     #define SCALAR_WORD_SIZE          64
 #else
+#define SCALAR_WORD_TYPE_SIZE 32
 #define SCALAR_WORD_TYPE          uint32_t
 #define SCALAR_HALF_WORD_TYPE     uint16_t
 #define SCALAR_WORD_SIZE          32
@@ -44,7 +44,8 @@ typedef struct scalar_native {
 } scalar_native;
 
 /** Values used in Montgomery multiplication.
- * These constants are precomputed for the specific modulus q of secp256r1.
+ * These constants are precomputed for the specific modulus q of secp256r1 (SECURITY_LEVEL == 128),
+ * or for the modulus q of secp521r1 (SECURITY_LEVEL == 256).
  * They are used to perform efficient modular reduction in Montgomery form.
  */
 #if (SECURITY_LEVEL == 128)
@@ -60,7 +61,7 @@ typedef struct scalar_native {
         0xBE79EEA2, 0x83244C95, 0x49BD6FA6, 0x4699799C, \
         0x2B6BEC59, 0x2845B239, 0xF3D95620, 0x66E12D94
 #elif (SCALAR_WORD_SIZE == 64)
-#define Q_PRIME 0x187E13645050D817ULL
+#define Q_PRIME_0 0xCCD1C8AAEE00BC4FULL
 #define Q_WORDS \
         0xF3B9CAC2FC632551ULL, 0xBCE6FAADA7179E84ULL, \
         0xFFFFFFFFFFFFFFFFULL, 0xFFFFFFFF00000000ULL
@@ -71,6 +72,42 @@ typedef struct scalar_native {
         0x83244C95BE79EEA2ULL, 0x4699799C49BD6FA6ULL, \
         0x2845B2392B6BEC59ULL, 0x66E12D94F3D95620ULL
 #endif
+#elif (SECURITY_LEVEL == 256)
+#if (SCALAR_WORD_SIZE == 32)
+#define Q_PRIME_0 0x79A995C7
+#define Q_WORDS \
+        0x91386409, 0xbb6fb71e, 0x899c47ae, 0x3bb5c9b8, \
+        0xf709a5d0, 0x7fcc0148, 0xbf2f966b, 0x51868783, \
+        0xfffffffa, 0xFFFFFFFF, 0XFFFFFFFF, 0xFFFFFFFF, \
+        0XFFFFFFFF, 0XFFFFFFFF, 0XFFFFFFFF, 0XFFFFFFFF, \
+        0x000001FF, 0x00000000
+#define ONE_WORDS \
+        0x00000001, 0x00000000, 0x00000000, 0x00000000, \
+        0x00000000, 0x00000000, 0x00000000, 0x00000000, \
+        0x00000000, 0x00000000, 0x00000000, 0x00000000, \
+        0x00000000, 0x00000000, 0x00000000, 0x00000000, \
+        0x00000000, 0x00000000
+#define R2_WORDS \
+        0xcf15dd04, 0x137cd04d, 0xe5547ea3, 0xf707badc, \
+        0x794573ff, 0x12a78d38, 0x57f75e06, 0xd3721ef5, \
+        0x2e49c7db, 0xdd6e23d8, 0xb7756e3e, 0xcff3d142, \
+        0xa8e567bc, 0x5bcc6d61, 0x492d0d45, 0x2d8e03d1, \
+        0x0000003d, 0x00000000
+#elif (SCALAR_WORD_SIZE == 64)
+#define Q_PRIME_0 0x1d2f5CCD79A995C7ULL
+#define Q_WORDS \
+        0xbb6fb71e91386409, 0x3bb5c9b8899c47ae, 0x7fcc0148f709a5d0, 0x51868783bf2f966b, \
+        0xFFFFFFFFfffffffa, 0xFFFFFFFFFFFFFFFF, 0xFFFFFFFFFFFFFFFF, 0XFFFFFFFFFFFFFFFF, \
+        0x00000000000001ff
+#define ONE_WORDS \
+        0x0000000000000001ULL, 0x0000000000000000ULL, 0x0000000000000000ULL, 0x0000000000000000ULL, \
+        0x0000000000000000ULL, 0x0000000000000000ULL, 0x0000000000000000ULL, 0x0000000000000000ULL, \
+        0x0000000000000000ULL
+#define R2_WORDS \
+        0x137cd04dcf15dd04, 0xf707badce5547ea3, 0x12a78d38794573ff, 0xd3721ef557f75e06, \
+        0xdd6e23d82e49c7db, 0xcff3d142b7756e3e, 0x5bcc6d61a8e567bc, 0x2d8e03d1492d0d45, \
+        0x000000000000003d
+#endif
 #endif
 
 extern const scalar_native Q_NATIVE;
@@ -78,10 +115,10 @@ extern const scalar_native ONE_NATIVE;
 extern const scalar_native R2_NATIVE;
 
 #if defined(SCALAR_WORD_TYPE) && defined(SCALAR_NUM_WORDS)
-#if SCALAR_NUM_WORDS == 17
+#if SCALAR_NUM_WORDS == 18
 /* Per secp521r1 su architetture a 32 bit */
-        #define SCALAR_CONST(d16, d15, d14, d13, d12, d11, d10, d9, d8, d7, d6, d5, d4, d3, d2, d1, d0) \
-            {{(d0), (d1), (d2), (d3), (d4), (d5), (d6), (d7), (d8), (d9), (d10), (d11), (d12), (d13), (d14), (d15), (d16)}}
+        #define SCALAR_CONST(d17, d16, d15, d14, d13, d12, d11, d10, d9, d8, d7, d6, d5, d4, d3, d2, d1, d0) \
+            {{(d0), (d1), (d2), (d3), (d4), (d5), (d6), (d7), (d8), (d9), (d10), (d11), (d12), (d13), (d14), (d15), (d16), (d17)}}
 
 #elif SCALAR_NUM_WORDS == 9
 /* Per secp521r1 su architetture a 64 bit */
@@ -107,9 +144,11 @@ static inline SCALAR_WORD_TYPE mul_add_carry(
         SCALAR_WORD_TYPE *carry
 ) {
 #if (SCALAR_WORD_SIZE == 64)
-    /* Versione ottimizzata a 64-bit usando gli interi a 128-bit del compilatore */
+    /* Versione ottimizzata a 64-bit formalmente blindata */
     unsigned __int128 prod = (unsigned __int128)a * b;
-    unsigned __int128 sum = prod + c + *carry;
+
+    // Forziamo esplicitamente tutti gli elementi a essere a 128 bit prima della somma
+    unsigned __int128 sum = prod + (unsigned __int128)c + (unsigned __int128)*carry;
 
     *carry = (SCALAR_WORD_TYPE)(sum >> 64);
     return (SCALAR_WORD_TYPE)sum;

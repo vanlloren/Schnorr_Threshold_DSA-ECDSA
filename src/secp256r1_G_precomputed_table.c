@@ -2,9 +2,16 @@
 // Created by PC on 14/05/2026.
 //
 
+#ifndef SECURITY_LEVEL
+#define SECURITY_LEVEL 128
+#endif
+
+#if SECURITY_LEVEL == 128
 #include "secp256r1_G_precomputed_table.h"
 
+
 /********** Precomputed table for the generator G **********/
+#if SCALAR_WORD_TYPE_SIZE == 32
 const point_ge PRECOMPUTED_G[PRECOMPUTED_G_SIZE] = {
         // 1G
         {
@@ -1541,4 +1548,1548 @@ const point_ge PRECOMPUTED_G[PRECOMPUTED_G_SIZE] = {
         }
         #endif
 };
+#elif SCALAR_WORD_TYPE_SIZE == 64
+const point_ge PRECOMPUTED_G[PRECOMPUTED_G_SIZE] = {
+                {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x79E730D418A9143C, 0x75BA95FC5FEDB601, 0x79FB732B77622510, 0x18905F76A53755C6 },
+                .y = { 0xDDF25357CE95560A, 0x8B4AB8E4BA19E45C, 0xD2E88688DD21F325, 0x8571FF1825885D85 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x850046D410DDD64D, 0xAA6AE3C1A433827D, 0x732205038D1490D9, 0xF6BB32E43DCF3A3B },
+                .y = { 0x2F3648D361BEE1A5, 0x152CD7CBEB236FF8, 0x19A8FB0E92042DBE, 0x78C577510A5B8A3B }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xFFAC3F904EEBC127, 0xB027F84A087D81FB, 0x66AD77DD87CBBC98, 0x26936A3FB6FF747E },
+                .y = { 0xB04C5C1FC983A7EB, 0x583E47AD0861FE1A, 0x788208311A2EE98E, 0xD5F06A29E587CC07 }
+        }
+,
+        #if (WINDOW_SIZE > 2)
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x74B0B50D46918DCC, 0x4650A6EDC623C173, 0x0CDAACACE8100AF2, 0x577362F541B0176B },
+                .y = { 0x2D96F24CE4CBABA6, 0x17628471FAD6F447, 0x6B6C36DEE5DDD22E, 0x84B14C394C5AB863 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xBE1B8AAEC45C61F5, 0x90EC649A94B9537D, 0x941CB5AAD076C20C, 0xC9079605890523C8 },
+                .y = { 0xEB309B4AE7BA4F10, 0x73C568EFE5EB882B, 0x3540A9877E7A1F68, 0x73A076BB2DD1E916 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x403947373E77664A, 0x55AE744F346CEE3E, 0xD50A961A5B17A3AD, 0x13074B5954213673 },
+                .y = { 0x93D36220D377E44B, 0x299C2B53ADFF14B5, 0xF424D44CEF639F11, 0xA4C9916D4A07F75F }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x0746354EA0173B4F, 0x2BD20213D23C00F7, 0xF43EAAB50C23BB08, 0x13BA5119C3123E03 },
+                .y = { 0x2847D0303F5B9D4D, 0x6742F2F25DA67BDD, 0xEF933BDC77C94195, 0xEAEDD9156E240867 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x27F14CD19499A78F, 0x462AB5C56F9B3455, 0x8F90F02AF02CFC6B, 0xB763891EB265230D },
+                .y = { 0xF59DA3A9532D4977, 0x21E3327DCF9EBA15, 0x123C7B84BE60BBF0, 0x56EC12F27706DF76 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x75C96E8F264E20E8, 0xABE6BFED59A7A841, 0x2CC09C0444C8EB00, 0xE05B3080F0C4E16B },
+                .y = { 0x1EB7777AA45F3314, 0x56AF7BEDCE5D45E3, 0x2B6E019A88B12F1A, 0x086659CDFD835F9B }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x2C18DBD19DC21EC8, 0x98F9868A0FCF8139, 0x737D2CD648250B49, 0xCC61C94724B3428F },
+                .y = { 0x0C2B407880DD9E76, 0xC43A8991383FBE08, 0x5F7D2D65779BE5D2, 0x78719A54EB3B4AB5 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xEA7D260A6245E404, 0x9DE407956E7FDFE0, 0x1FF3A4158DAC1AB5, 0x3E7090F1649C9073 },
+                .y = { 0x1A7685612B944E88, 0x250F939EE57F61C8, 0x0C0DAA891EAD643D, 0x68930023E125B88E }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x04B71AA7D2697768, 0xABDEDEF5CA345A33, 0x2409D29DEE37385E, 0x4EE1DF77CB83E156 },
+                .y = { 0x0CAC12D91CBB5B43, 0x170ED2F6CA895637, 0x28228CFA8ADE6D66, 0x7FF57C9553238ACA }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xCCC425634B2ED709, 0x0E356769856FD30D, 0xBCBCD43F559E9811, 0x738477AC5395B759 },
+                .y = { 0x35752B90C00EE17F, 0x68748390742ED2E3, 0x7CD06422BD1F5BC1, 0xFBC08769C9E7B797 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xA242A35BB0CF664A, 0x126E48F77F9707E3, 0x1717BF54C6832660, 0xFAAE7332FD12C72E },
+                .y = { 0x27B52DB7995D586B, 0xBE29569E832237C2, 0xE8E4193E2A65E7DB, 0x152706DC2EAA1BBB }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x72BCD8B7BC60055B, 0x03CC23EE56E27E4B, 0xEE337424E4819370, 0xE2AA0E430AD3DA09 },
+                .y = { 0x40B8524F6383C45D, 0xD766355442A41B25, 0x64EFA6DE778A4797, 0x2042170A7079ADF4 }
+        }
+,
+        #endif
+        #if (WINDOW_SIZE > 4)
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x808B0B650BC6FB80, 0x5882E0753FFE2E6B, 0xD5EF2F7C2C83F549, 0x54D63C809103B723 },
+                .y = { 0xF2F11BD652A23F9B, 0x3670C3194B0B6587, 0x55C4623BB1580E9E, 0x64EDF7B201EFE220 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x97091DCBD53C5C9D, 0xF17624B6AC0A177B, 0xB0F139752CFE2DFF, 0xC1A35C0A6C7A574E },
+                .y = { 0x227D314693E79987, 0x0575BF30E89CB80E, 0x2F4E247F0D1883BB, 0xEBD512263274C3D0 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x5F3E51C856ADA97A, 0x4AFC964D8F8B403E, 0xA6F247AB412E2979, 0x675ABD1B6F80EBDA },
+                .y = { 0x66A2BD725E485A1D, 0x4B2A5CAF8F4F0B3C, 0x2626927F1B847BBA, 0x6C6FC7D90502394D }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xFEA912BAA5659AE8, 0x68363ABA25E1A16E, 0xB8842277752C41AC, 0xFE545C282897C3FC },
+                .y = { 0x2D36E9E7DC4C696B, 0x5806244AFBA977C5, 0x85665E9BE39508C1, 0xF720EE256D12597B }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x8A979129D2337A31, 0x5916868F0F862BDC, 0x048099D95DD283BA, 0xE2D1EEB6FE5BFB4E },
+                .y = { 0x82EF1C417884005D, 0xA2D4EC17FFFFCBAE, 0x9161C53F8AA95E66, 0x5EE104E1C5FEE0D0 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x562E4CECC135B208, 0x74E1B2654783F47D, 0x6D2A506C5A3F3B30, 0xECEAD9F4C16762FC },
+                .y = { 0xF29DD4B2E286E5B9, 0x1B0FADC083BB3C61, 0x7A75023E7FAC29A4, 0xC086D5F1C9477FA3 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x0FC611352F6F3076, 0xC99FFA23E3912A9A, 0x6A0B0685D2F8BA3D, 0xFDC777E8E93358A4 },
+                .y = { 0x94A787BB35415F04, 0x640C2D6A4D23FEA4, 0x9DE917DA153A35B5, 0x793E8D075D5CD074 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xF4F876532DE45068, 0x37C7A7E89E2E1F6E, 0xD0825FA2A3584069, 0xAF2CEA7C1727BF42 },
+                .y = { 0x0360A4FB9E4785A9, 0xE5FDA49C27299F4A, 0x48068E1371AC2F71, 0x83D0687B9077666F }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x6D3883B215D02819, 0x6D0D755040DD9A35, 0x61D7CBF91D2B469F, 0xF97B232F2EFC3115 },
+                .y = { 0xA551D750B24BCBC7, 0x11EA494988A1E356, 0x7669F03193CB7501, 0x595DC55ECA737B8A }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xA4A319ACD837879F, 0x6FC1B49EED6B67B0, 0xE395993332F1F3AF, 0x966742EB65432A2E },
+                .y = { 0x4B8DC9FEB4966228, 0x96CC631243F43950, 0x12068859C9B731EE, 0x7B948DC356F79968 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x61E4AD32ED1F8008, 0xE6C9267AD8B17538, 0x1AC7C5EB857FF6FB, 0x994BAAA855F2FB10 },
+                .y = { 0x84CF14E11D248018, 0x5A39898B628AC508, 0x14FDE97B5FA944F5, 0xED178030D12E5AC7 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x042C2AF497E2FEB4, 0xD36A42D7AEBF7313, 0x49D2C9EB084FFDD7, 0x9F8AA54B2EF7C76A },
+                .y = { 0x9200B7BA09895E70, 0x3BD0C66FDDB7FB58, 0x2D97D10878EB4CBB, 0x2D431068D84BDE31 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x4B523EB7172CCD1F, 0x7323CB2830A6A892, 0x97082EC0CFE153EB, 0xE97F6B6AF2AADB97 },
+                .y = { 0x1D3D393ED1A83DA1, 0xA6A7F9C7804B2A68, 0x4A688B482D0CB71E, 0xA9B4CC5F40585278 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x5E5DB46ACB66E132, 0xF1BE963A0D925880, 0x944A70270317B9E2, 0xE266F95948603D48 },
+                .y = { 0x98DB66735C208899, 0x90472447A2FB18A3, 0x8A966939777C619F, 0x3798142A2A3BE21B }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xB4241CB13298B343, 0xA3A14E49B44F65A1, 0xC5F4D6CD3AC77ACD, 0xD0288CB552B6FC3C },
+                .y = { 0xD5CC8C2F1C040ABC, 0xB675511E06BF9B4A, 0xD667DA379B3AA441, 0x460D45CE51601F72 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xE2F73C696755FF89, 0xDD3CF7E7473017E6, 0x8EF5689D3CF7600D, 0x948DC4F8B1FC87B4 },
+                .y = { 0xD9E9FE814EA53299, 0x2D921CA298EB6028, 0xFAECEDFD0C9803FC, 0xF38AE8914D7B4745 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xD8C5FCCFC5E3A3D8, 0xBEFD904C4079DFBF, 0xBC6D6A58FEAD0197, 0x39227077695532A4 },
+                .y = { 0x09E23E6DDBEF42F5, 0x7E449B64480A9908, 0x7B969C1AAD9A2E40, 0x6231D7929591C2A4 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x871514560F664534, 0x85CEAE7C4B68F103, 0xAC09C4AE65578AB9, 0x33EC6868F044B10C },
+                .y = { 0x6AC4832B3A8EC1F1, 0x5509D1285847D5EF, 0xF909604F763F1574, 0xB16C4303C32F63C4 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xB6AB20147CA23CD3, 0xCAA7A5C6A391849D, 0x5B0673A375678D94, 0xC982DDD4DD303E64 },
+                .y = { 0xFD7B000B5DB6F971, 0xBBA2CB1F6F876F92, 0xC77332A33C569426, 0xA159100C570D74F8 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xFD16847FDEC67EF5, 0x742EE464233E76B7, 0x0B8E4134EFC2B4C8, 0xCA640B8642A3E521 },
+                .y = { 0x653A01908CEB6AA9, 0x313C300C547852D5, 0x24E4AB126B237AF7, 0x2BA901628BB47AF8 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x3D5E58D6A8219BB7, 0xC691D0BD1B06C57F, 0x0AE4CB10D257576E, 0x3569656CD54A3DC3 },
+                .y = { 0xE5EBAEBD94CDA03A, 0x934E82D3162BFE13, 0x450AC0BAE251A0C6, 0x480B9E11DD6DA526 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x00467BC58CCE08B5, 0xB636458C7F178D55, 0xC5748BAEA677D806, 0x2763A387DFA394EB },
+                .y = { 0xA12B448A7D3CEBB6, 0xE7ADDA3E6F20D850, 0xF63EBCE51558462C, 0x58B36143620088A8 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x8A2CC3CA4D63C0EE, 0x512331170FE948CE, 0x7463FD85222EF33B, 0xADF0C7DC7C603D6C },
+                .y = { 0x0EC32D3BFE7765E5, 0xCCAAB359BF380409, 0xBDAA84D68E59319C, 0xD9A4C2809C80C34D }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xA9D89488A059C142, 0x6F5AE714FF0B9346, 0x068F237D16FB3664, 0x5853E4C4363186AC },
+                .y = { 0xE2D87D2363C52F98, 0x2EC4A76681828876, 0x47B864FAE14E7B1C, 0x0C0BC0E569192408 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xE4D7681DB82E9F3E, 0x83200F0BDF25E13C, 0x8909984C66F27280, 0x462D7B0075F73227 },
+                .y = { 0xD90BA188F2651798, 0x74C6E18C36AB1C34, 0xAB256EA35EF54359, 0x03466612D1AA702F }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x624D60492ED22E91, 0x6FDFE0B56F072822, 0xEECA111539CE2271, 0x98100A4FDB01614F },
+                .y = { 0xB6B0DAA2A35C628F, 0xB6F94D2EC87E9A47, 0xC67732591D57D9CE, 0xF70BFEEC03884A7B }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x5FB35CCFED2BAD01, 0xA155CBE31DA6A5C7, 0xC2E2594C30A92F8F, 0x649C89CE5BFAFE43 },
+                .y = { 0xD158667DE9FF257A, 0x9B359611F32C50AE, 0x4B00B20B906014CF, 0xF3A8CFE389BC7D3D }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x4FF23FFD248A7D06, 0x80C5BFB4878873FA, 0xB7D9AD9005745981, 0x179C85DB3DB01994 },
+                .y = { 0xBA41B06261A6966C, 0x4D82D052EADCE5A8, 0x9E91CD3BA5E6A318, 0x47795F4F95B2DDA0 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xECFD7C1FD55A897C, 0x009194ABB29110FB, 0x5F0E2046E381D3B0, 0x5F3425F6A98DD291 },
+                .y = { 0xBFA06687730D50DA, 0x0423446C4B083B7F, 0x397A247DD69D3417, 0xEB629F90387BA42A }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x1EE426CCD5CD79BF, 0x0032940B946C6E18, 0x1B1E8AE057477F58, 0xE94F7D346D823278 },
+                .y = { 0xC747CB96782BA21A, 0xC5254469F72B33A5, 0x772EF6DEC7F80C81, 0xD73ACBFE2CD9E6B5 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x4075B5B149EE90D9, 0x785C339AA06E9EBA, 0xA1030D5BABF825E0, 0xCEC684C3A42931DC },
+                .y = { 0x42AB62C9C1586E63, 0x45431D665AB43F2B, 0x57C8B2C055F7835D, 0x033DA338C1B7F865 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x283C7513CAA76097, 0x0A624FA936C83906, 0x6B20AFEC715AF2C7, 0x4B969974EBA78BFD },
+                .y = { 0x220755CCD921D60E, 0x9B944E107BAECA13, 0x04819D515DED93D4, 0x9BBFF86E6DDDFD27 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x6B34413077ADC612, 0xA7496529BBD803A0, 0x1A1BAAA76D8805BD, 0xC8403902470343AD },
+                .y = { 0x39F59F66175ADFF1, 0x0B26D7FBB7D8C5B7, 0xA875F5CE529D75E3, 0x85EFC7E941325CC2 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x21950B421FF6ACD3, 0xFFE7048453DC6909, 0xFF4CD0B228766127, 0xABDBE6084FB7DB2B },
+                .y = { 0x837C92285E1109E8, 0x26147D27F4645B5A, 0x4D78F592F7818ED8, 0xD394077EF247FA36 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x0FB9C2D0488C171A, 0xA78BFBAA13685278, 0xEDFBE268D5B1FA6A, 0x0DCEB8DB2B7EABA7 },
+                .y = { 0xBF9E80899AE2B710, 0xEFDE7AE6A4449C96, 0x43B7716BCC143A46, 0xD7D34194C3628C13 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x508CEC1C3B3F64C9, 0xE20BC0BA1E5EDF3F, 0xDA1DEB852F4318D4, 0xD20EBE0D5C3FA443 },
+                .y = { 0x370B4EA773241EA3, 0x61F1511C5E1A5F65, 0x99A5E23D82681C62, 0xD731E383A2F54C2D }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x2692F36E83445904, 0x2E0EC469AF45F9C0, 0x905A3201C67528B7, 0x88F77F34D0E5E542 },
+                .y = { 0xF67A8D295864687C, 0x23B92EAE22DF3562, 0x5C27014B9BBEC39E, 0x7EF2F2269C0F0F8D }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x97359638546C4D8D, 0x5F9C3FC492F24679, 0x912E8BEDA8C8ACD9, 0xEC3A318D306634B0 },
+                .y = { 0x80167F41C31CB264, 0x3DB82F6F522113F2, 0xB155BCD2DCAFE197, 0xFBA1DA5943465283 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xA0425B8EB212CF53, 0x4F2E512EF8557C5F, 0xC1286FF925C4D56C, 0xBB8A0FEAEE26C851 },
+                .y = { 0xC28F70D2E7D6107E, 0x7EE0C444E76265AA, 0x3DF277A41D1936B1, 0x1A556E3FEA9595EB }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x258BBBF9E7305683, 0x31EEA5BF07EF5BE6, 0x0DEB0E4A46C814C1, 0x5CEE8449A7B730DD },
+                .y = { 0xEAB495C5A0182BDE, 0xEE759F879E27A6B4, 0xC2CF6A6880E518CA, 0x25E8013FF14CF3F4 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x8FC441407E8D7A14, 0xBB1FF3CA9556F36A, 0x6A84438514600044, 0xBA3F0C4A7451AE63 },
+                .y = { 0xDFCAC25B1F9AF32A, 0x01E0DB86B1F2214B, 0x4E9A5BC2A4B596AC, 0x83927681026C2C08 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x3EC832E77ACACA28, 0x1BFEEA57C7385B29, 0x068212E3FD1EAF38, 0xC13298306ACF8CCC },
+                .y = { 0xB909F2DB2AAC9E59, 0x5748060DB661782A, 0xC5AB2632C79B7A01, 0xDA44C6C600017626 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xF26C00E8A7EA82F0, 0x99CAC80DE4299AAF, 0xD66FE3B67ED78BE1, 0x305F725F648D02CD },
+                .y = { 0x33ED1BC4623FB21B, 0xFA70533E7A6319AD, 0x17AB562DBE5FFB3E, 0x0637499456674741 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x69D44ED65C46AA8E, 0x2100D5D3A8D063D1, 0xCB9727EAA2D17C36, 0x4C2BAB1B8ADD53B7 },
+                .y = { 0xA084E90C15426704, 0x778AFCD3A837EBEA, 0x6651F7017CE477F8, 0xA062499846FB7A8B }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xDC1E6828ED8A6E19, 0x33FC23364189D9C7, 0x026F8FE2671C39BC, 0xD40C4CCDBC6F9915 },
+                .y = { 0xAFA135BBF80E75CA, 0x12C651A022ADFF2C, 0xC40A04BD4F51AD96, 0x04820109BBE4E832 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x3667EB1A7F4C04CC, 0x59556621A9404F84, 0x71CDF6537ECEB50A, 0x994A44A69B8335FA },
+                .y = { 0xD7FAF819DBEB9B69, 0x473C5680EED4350D, 0xB6658466DA44BBA2, 0x0D1BC780872BDBF3 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xE535F175A1962F91, 0x6ED7E061ED58F5A7, 0x177AA4C02089A233, 0x0DBCB03AE539B413 },
+                .y = { 0xE3DC424EBB32E38E, 0x6472E5EF6806701E, 0xDD47FF98814BE9EE, 0x6B60CFFF35ACE009 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xB8D3D9319FF91FE5, 0x039C4800F0518EED, 0x95C376329182CB26, 0x0763A43482FC568D },
+                .y = { 0x707C04D5383E76BA, 0xAC98B930824E8197, 0x92BF7C8F91230DE0, 0x90876A0140959B70 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xDB6D96F305968B80, 0x380A0913089F73B9, 0x7DA70B83C2C61E01, 0x95FB8394569B38C7 },
+                .y = { 0x9A3C651280EDFE2F, 0x8F726BB98FAEAF82, 0x8010A4A078424BF8, 0x296720440E844970 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xDC2306EBFCDBB2B2, 0x79527DB7BA66F4B9, 0xBF639ED67765765E, 0x01628C4706B6090A },
+                .y = { 0x66EB62F1B957B4A1, 0x33CB7691BA659F46, 0x2C90D98CF3E055D6, 0x7D096AC42F174750 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xC7C6E4D1C4CE250F, 0xA3CFA7FD44B81977, 0x5A7E384DE42F8CB2, 0x78ED4FE6E3A7DE48 },
+                .y = { 0xA9231C8CE9E571CA, 0x55912064D0F5BB2A, 0x9C03344B75554FAD, 0xB12347993E909DFB }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x86F04D3B51F9C391, 0xC16D0C52A48A4DDD, 0xFC88362A891EA186, 0xE8218AD07DE96A54 },
+                .y = { 0x2C735AC12F33AF7A, 0x05AF456A06620AE8, 0xDE3EC728C30A96A0, 0xFD59D7EB9A8F62D9 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x8732D5CD6A93954D, 0xC35D34E70DD71FAB, 0xB2CDB039F99C55FE, 0x031195D5BB4A44B9 },
+                .y = { 0xBAA37F5D08A660C8, 0xBB7047347B57DF81, 0x440DEC9ECE0F8C32, 0xF66904B1400C9463 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x9E5DA11CC5E79347, 0x87986A54361BFE25, 0xC856868891E9AE09, 0x49D3AD05548EFA2A },
+                .y = { 0x987B0687F4EB5CF6, 0x9BEA0D0F2655D14F, 0x2126AC553A8DD126, 0x6D37B1FA546FBECC }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x7C5A2A14F58A379A, 0x7263DE1539F76B81, 0x681D690F2B3A8C59, 0x100392DC78C04937 },
+                .y = { 0x07E5E8E85BEF953A, 0xD11AE42DAD0182E4, 0x9CC6E22A27C9A2EA, 0xC6793AD2E6E2F3B1 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xF19F382E92AA7864, 0x49C7CB94FC05804B, 0xF94AA89B40750D01, 0xDD421B5D4A210364 },
+                .y = { 0x56CD001E39DF3672, 0x030A119FDD4AF1EC, 0x11F947E696CD0572, 0x574CC7B293786791 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x7331369679C1E3B1, 0xB1EE4879A360FB55, 0xEB5D0C75F38FAE9C, 0xC3B025A015B15144 },
+                .y = { 0x33AD53540DC40604, 0x1BA0CB8C9C5D2E6A, 0x0368EB1F2E4283E1, 0x6FCD0CBB809A06F2 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xAE8F8FE1EEB03D1A, 0x2B34A7DC096FB852, 0x794922EF17E29B1A, 0xB2DACDF66EF82FCE },
+                .y = { 0xDB8DCC81F42911EE, 0xB871BA63E405CA09, 0xA66D92525E82D5B3, 0xC39725521AF82878 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x46CE85A9E25A441E, 0x294B12E1CA1B04E0, 0xB00EEA8A5D34F708, 0xD176448E35B23E27 },
+                .y = { 0x5CE885392BB80EF9, 0x0C45E52DB3BFFFC8, 0x77C52D75519978D1, 0x0A48558F2FA1BD2F }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x616D2C02FB760095, 0xCFA8CA0E2A7AA6AB, 0xF123716223AF72E0, 0xA22F8FBEA42FD1F6 },
+                .y = { 0x5072758B78F3D040, 0x7BE19F0DED4437A8, 0xE79807A770456A7E, 0x24A1BDE1D0C2302D }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xCD331464C89BDD46, 0x285BED3C21848F49, 0x7C703717CD1823B4, 0x1558FE4C7EF5B48A },
+                .y = { 0x19C6602050EAED5F, 0x3FC6E661D47FA3CB, 0xEE4826A9937E1BA3, 0x9B3B040493B83E45 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x0A2193BFC266F85C, 0x719A87BE5A0EC9CE, 0x9C30C6422B2F9C49, 0xDB15E4963D5BAEB1 },
+                .y = { 0x83C3139BE0D37321, 0x4788522B2E9FDBB2, 0x2B4F0C7877EB94EA, 0x854DC9D595105F9E }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xADE6AF11A6AB1ECF, 0x7E96610365013B3A, 0x711F8B7F7B5065A4, 0xC0E78A3897536F3F },
+                .y = { 0x48B4389C464423D3, 0x407BFFA1B2011371, 0xEA2240CCEF96B473, 0xF8BDF2EA8474D0C8 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xA40206D330FF0E92, 0xDD306E2A05176F8B, 0x58F6428165F89E14, 0x5ED556AAE89327FC },
+                .y = { 0xC2B1870AF8321BB8, 0x097A54FF99227B16, 0xD07370C450128375, 0xB75DF5EC191A421F }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x492BDC0752B3E584, 0x35FF9AA8B5F86A2C, 0x2074213DB27DE573, 0xC0BFFFC45263832A },
+                .y = { 0x2429C22A1D49C605, 0x1B037D75B320EBFB, 0x52B6A1739220F428, 0x2995919CA4CD2660 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xD3A5D81FC63D5E79, 0x8E9D0AF402BA3183, 0xB097C711165C6E4C, 0xE0BEEB1AEBFF18D3 },
+                .y = { 0xFE657F130801937B, 0xA02DBC426FE5B29D, 0xCBDBFDB9CF290D1F, 0x7ACF4419E85BC145 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x80EE662FAD29CF9C, 0x59D18BE925A81AEF, 0xB932D0C175274655, 0x8D97FD53554FA366 },
+                .y = { 0xAD5CB247CD789D17, 0x41A471E4E93046F2, 0x4976126318FB05AE, 0x18F61F3CDEF3F99D }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x2C9EE62DC3363A22, 0x125D4714EC67199A, 0xF87ABEBF2AB80485, 0xCF3086E87A243CA4 },
+                .y = { 0x5C52B051C64E09DD, 0x5E9B16125625AAD7, 0x0536A39DB19C6126, 0x97F0013247B64BE5 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xB7F1695A43020EEC, 0x2CD0BAB9941A27E9, 0x10B429A2811A47EB, 0x2F83A889CA881F6C },
+                .y = { 0x2563C590F683E890, 0x67F9BA802E45CBB1, 0xDF4741A71B99EC5F, 0x4CB3C135B6F36034 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x3646B0DD7E1EE314, 0xEF617E0025AF7677, 0x36BF2F65EA65641A, 0xABFC8457B5E11EFF },
+                .y = { 0x998DFAC18F1192B6, 0xCE91EE270142811B, 0xBB0066AE1F282369, 0x159751E2E1CBAEBE }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xDD5C2B8142A18DC1, 0x783B9BA6744A6528, 0x23FB74270B4AF06E, 0xA9EA1B80F80E4B90 },
+                .y = { 0x559759F6EDCA6F38, 0x4A2B5ED57DEFE51B, 0x9A9F04F0E8AEAF7D, 0xE6C93B31CEFDB61D }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x516329FF7B4D8B2C, 0xB856664A2D4B409B, 0x041252997F6B0670, 0x2BD0204360826CAA },
+                .y = { 0x010E522661DDBCB1, 0xCD07BC34C235D56C, 0xA8F439AB06E58E3E, 0xAF490825D5CFF157 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x7D81FD488418CAE4, 0xABEEE3E9369A6067, 0x1707165BB939F40F, 0x948FB3F76932E631 },
+                .y = { 0x005A1DFFEABD468E, 0xBDF176108C7F9DBA, 0xED5CF82DC911847C, 0xD8D37D942785971D }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xC1EE6264A7EABE67, 0x62D51E29FD54487D, 0x3EA123446310EB5A, 0xBD88ACA74765B805 },
+                .y = { 0xB7B284BE14FB691A, 0x640388F83B9FFFEF, 0x7AB49DD209F98F9A, 0x7150F87E7211E445 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x9AF9D782DE992E6E, 0x47305B7483E90446, 0xF3DF44DED7EE64B7, 0x8307D5CB55648A4C },
+                .y = { 0x5376B018E277280A, 0xABFF56B525D3FDEE, 0xAD3294FB1C309A59, 0xE485B90D49C0B6A1 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xD81AD9386982F865, 0x27113BB4AE6A94B8, 0x4A39F02BBEDD4F47, 0x0211DE8FD5692705 },
+                .y = { 0xD587138C63C92F69, 0x2354719F6237FC68, 0xFA8A5B9B0B46A59F, 0x4A70ABF75C554ED3 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x9D7127D76294BA47, 0xA8A38BC31487C526, 0xE4C8417839093801, 0xAEE309E543AE4336 },
+                .y = { 0xD4B127399359250D, 0x9929AD4E8F48BB12, 0x4A72075D7F73442A, 0xD15428592FAAB294 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x64CFDC70D9453D29, 0x0AEACA9AFD36B1AF, 0x4A278686E1639607, 0x0581B4711FDF2498 },
+                .y = { 0x82290E253D61F6D2, 0x20B021C3DF219DC5, 0xFF6C1A78F9A2852F, 0x435AC466954FFBB3 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xC82A7AEFD2DF5E7A, 0x955EF205D59848EB, 0xC87BDB8203D41796, 0xBF87EA83037278D9 },
+                .y = { 0xC5825A638719AEA8, 0xC00286D964135771, 0xF8EA79EADFA99607, 0x1001F8D7DD85AA7B }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x263E039BB308CC40, 0x6684AD762B346FD2, 0x9A127F2BCAA12D0D, 0x76A8F9FEA974291F },
+                .y = { 0xC802049B68AA19E4, 0x65499C990C5DBBA0, 0xEE1B1CB5344455A1, 0x3F293FDA2CD6F439 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x802B8D2333E12B70, 0x6D490A4B19DD329B, 0x14F356CC6ABC354D, 0x11EDDF7FD0A0DA0D },
+                .y = { 0x1E208328D87FD1D8, 0xFD2F4F8CFD025813, 0x03B48CC47C29BCA2, 0x3F2A78B3241A2B71 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xDC90323BAFCEB64D, 0xDA8CDB78397E43F4, 0xEE848E1D2566805E, 0xF1AE5380578181C7 },
+                .y = { 0x2DC7B8E69C70C77C, 0x85F4D9C45B68B7E7, 0x84577F1F3260B767, 0x1FBD470F53CF3E69 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xD5192C88589B69FF, 0xCC8715ABBC82A095, 0x74B44206EE3751BE, 0xA6EECF308794885E },
+                .y = { 0xA05A7AA8DD0CE3B4, 0xA3F98377DAA4C864, 0x6B5DF55FE390DA5B, 0xE9F04CD324C2E311 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x2D037BF83F9432B4, 0xB1F1ABB66A7B4371, 0x650522FD4A9A3B17, 0xBC438AE1A4E65B07 },
+                .y = { 0x31B57EA284693C04, 0x7AB58A3F75503E46, 0x03A3C2C7B98FF4B3, 0x4A673FE054FCD65A }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xB9A17DB9BF61FEC5, 0xFE49233161C52CF8, 0xF7AC46733FE90A2F, 0x55401274EB1385F3 },
+                .y = { 0xA5DB852C23FD068F, 0xADB9E9B685BAC6B7, 0x6AA068C230548CF4, 0x63BE9E64A1715422 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xB7A96E0A4EA6FDF7, 0xBBE914D3B99CD026, 0x6A610374C569A602, 0xE9B1C23914DA499E },
+                .y = { 0xB5F6F0FEADC19A99, 0x731251826F21687C, 0x5A8A14644BE77793, 0x94CE9E0ADBA8BFC7 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x41A6FE768F9B4748, 0xF5284782E9F60F18, 0xCE33E49CDD3DAC5C, 0x0FCAEC0FFECF6FED },
+                .y = { 0xCA1CE130A54EDFC4, 0x6445FBCD5BC92AA3, 0xF3D348F820FE78E3, 0xA2776D9F8417C98F }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x564BDDA6C71F8D02, 0xD0A875E919F7F72C, 0x57670E41BF619241, 0xF51EC8724C3C386F },
+                .y = { 0x00AEC19EE8BF7D17, 0x5DF79360286166F3, 0xA6FAE60930A4F924, 0x1429B1F8AE1D3ED8 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x82D0020682C4BD6A, 0x90EE46554C2A6235, 0x35D2293FC7AC3EFA, 0x1D6DE36B734FC1B8 },
+                .y = { 0x946AC3BFCFF75858, 0xFFCCF5E161217DEE, 0x75AEF88A77B9D084, 0x6BA92BCADE5A0CC1 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xDE6DDCB77B371390, 0xCB11125C02A9BA44, 0xC08EC1602B1D28FD, 0x680D5ABF65E03A86 },
+                .y = { 0xD5EC7BBBF5327839, 0xC87057CA3BCE7FE5, 0x4E346DB071CBFC97, 0xD3D6D111EE9E512F }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xC4C398CC1E628B51, 0x750C11BBC098AEFA, 0xB81F9FB1279DF6FF, 0x7145405DFF1765EC },
+                .y = { 0x3C3D861D83AAE16F, 0x137218257BC27EF7, 0x5CBB069B03FE8FAC, 0x262F03EB0757AAEA }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x2CA0BA9C3796F4C7, 0x3571E4D1592CE334, 0x28F9CDEBE9F6E877, 0xEE206023EFCE1A70 },
+                .y = { 0xB2159E08B76369DC, 0x2754E4260A7F687C, 0xE008039E02DE2FF1, 0xCCD7E9418EA700C1 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x2871263F72371E17, 0x14D147984D7DF1FF, 0xD1A8678742E1CBF4, 0x9D873705000A079B },
+                .y = { 0x3A7F4AD5E01FFE00, 0x3633966C70094E6A, 0x08E545F1B13E2B49, 0x0D66CFC94B5D416D }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xAEC63ACBDD10EDD0, 0xFD4F61E491AE8D13, 0xE7B092174DF861F4, 0x3720B2475548DE20 },
+                .y = { 0xAF419847EBF3DF78, 0xE7229D8956CD660D, 0x0CD622BAEB879899, 0x5FDAEE391CAB12C7 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x76FBEDB5A463FBAD, 0xB1FC8C8C23FBBE6E, 0x45AE78BA39DCAB99, 0xE7009EE6652405A9 },
+                .y = { 0xB9A8FC5F8C0531E8, 0x5761490F7F000956, 0x270C706C6E4840F1, 0x798CA99E4EF37E3C }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xD87F4AE086653AA8, 0x327DAC318072F08D, 0x098F37BB0832C416, 0x0CF804D77A9B6A20 },
+                .y = { 0x4B9C5438A67E2173, 0x1CC0D4CEA23AFA67, 0x270ADCC57148B135, 0xF9AF0ACD904D4731 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x6A9505760A99CBCA, 0x94E258F604A428F2, 0x45AB5A4D7832BA0C, 0x71704D008938C167 },
+                .y = { 0xDB97AB0EF88B8B70, 0x56FEB92EC00EB207, 0xE70352687D367D80, 0x65000C24C7973A41 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xA125E6C1B7EBCB88, 0x3289E86E10EC0D40, 0xCC3A5ECB98353869, 0x734E0D078A2B0D3A },
+                .y = { 0xE0D92E9A51933360, 0xFA6BCDB1786076B9, 0xD13CCA90747F19EC, 0x61D8209D49F3A53D }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x751E03F0216F7C55, 0x18849F8EBC30D62C, 0x7AFEC8BB9B4E920C, 0x08E2F429F216DC99 },
+                .y = { 0x5E5DDF821D6CC33E, 0x97B596A14D7BF847, 0x96B984140A9F8671, 0xBC0EEC86924DD154 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xAD19E039119F6CAB, 0xF15B920FA8DFCE56, 0x8A2627C4851B5BC7, 0x7C3FF661D8ECCA6E },
+                .y = { 0xB9DD2BF2D5F5B5BF, 0x56B76C57BAA43B27, 0xDC8DF855FE2F4937, 0xE95DD9D8889821B2 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x87F9793BC9826344, 0x4B3DE89BB2F5F79C, 0xC9F08A5659CB1B6E, 0xD8F1FC5F6A92B9AA },
+                .y = { 0x86357F9EB412595E, 0x53C30BBE65B80F16, 0xF06C2C8C70549A57, 0xA9C8A4B42B9157DA }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x08E4C4901B620DC4, 0x55A3BB1AD9699E92, 0x7890E8D547968833, 0xBBDBEC7D79AF29B1 },
+                .y = { 0x92750DE73E51E1BC, 0x50CF6D11AD91A350, 0x9DC33392FA67285C, 0x2CDF7F854480FFE3 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x24C00DE93F5F68A6, 0xF8F1D8415512EC1C, 0x24869D65BB07AD54, 0x4977379654D7A19E },
+                .y = { 0x04F357D1F061CEDE, 0x741BF80A03BC88E6, 0x6CF96715C527A656, 0xC9C4D63998E59B62 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x87AF199E6CC47305, 0x062AFB7C1E314DDE, 0x2BE22BA0F3A49FB4, 0x6ED0B988157B7F56 },
+                .y = { 0x8162CF502D653FD9, 0x17D29C64877B7497, 0xD7E814380F67B514, 0xFEDF1014FE6EE703 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x6EBDB7BCD0303BA4, 0x094E7DDF4F6AB73A, 0xB62AAF7C37E7454E, 0x9C7EA21245A2473F },
+                .y = { 0xCA76E7549488D036, 0x9A278A9DAAA03497, 0x48CD158B2C1EB541, 0xD007EC78A47A7152 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x14D7251A8C03E3F4, 0xD71602D5B0E5FE20, 0x27D2BF4F683B30D1, 0xE1A8D418F77F10E1 },
+                .y = { 0xA4941A1E76A0EAD7, 0xFF318484DA0A4996, 0xAAF4D4E193394872, 0xAE839CD80E99505C }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x536EEEA92F4FF97A, 0xD183A961CAF64CBD, 0xBF357E0C9358983A, 0x62280F9A573FBFA8 },
+                .y = { 0x001DA1B77E9176B3, 0x6EA945BDB1901D3D, 0x4C6B9954BD51F905, 0x7AA3B3CCB2A104B2 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x62EA859803B58B02, 0x5A71497198A5EA8C, 0x1783D1B6917E4725, 0x2D7CA4D8F1E35487 },
+                .y = { 0x3F69B4D49B4D4324, 0xDA04CC898E17FF54, 0x5870726C16E3E02A, 0xAEB9041C69E788C5 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x10F264BC85FC00A2, 0x0A10ED1576D7996D, 0x49B1DFCA7F141275, 0xD8C0472156DB1266 },
+                .y = { 0x43DFABF3CD768437, 0x58D85051E4DD905A, 0x9B94C4AD4C99E439, 0x8448ECAE901289FE }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xAAB54CFC93740130, 0xF72DAB6D225733FA, 0x04B76D2D1ED32559, 0xA9FE2396BB85B9CB },
+                .y = { 0x128B0D24BF2219F0, 0x2292393B579F3CE2, 0x51DC5FAC145FF0D5, 0xB16D6AF8C3FEBBC1 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x9C9635BE52BF127A, 0x519A47B4807A9D28, 0x9A7D703660AB52E9, 0x6941195B752838C3 },
+                .y = { 0x60FFBE2E70DA613F, 0x8459F57052761718, 0x5F153F56AA36DE2D, 0x91A4EA6D215215F6 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x36E84BB6DEE35B41, 0x70E9016CDDDFD928, 0x6072A061AE619F28, 0x15FE6A86904A36CF },
+                .y = { 0x9AB6968BF6005965, 0xFD1C4A970AD602D0, 0xD0A8879244F403F2, 0x76759223ABE3C14B }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x63C5CB817A2AD62A, 0x7EF2B6B9AC62FF54, 0x3749BBA4B3AD9DB5, 0xAD311F2C46D5A617 },
+                .y = { 0xB77A8087C2FF3B6D, 0xB46FEAF3367834FF, 0xF8AA266D75D6B138, 0xFA38D320EC008188 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x45D8FADF89A6B23C, 0x057DEE066FFFBBFE, 0x6DD5757B4774E5E2, 0xB44267FA47607091 },
+                .y = { 0xD254AC6FAC739807, 0xB29BEA93E4097EAC, 0xDE07A886CE2B1765, 0xA326800A6561E516 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x9967CB4A1E379D0A, 0x7A6357D9E1E6ADD9, 0xCA3974E8779E6CAC, 0x2F169029856196F0 },
+                .y = { 0xE004869E0F737805, 0x07F284A31EFEF15F, 0x46102B446588EAD4, 0x0F28B78FCBD1DC45 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x44359AC0EE931637, 0xD7AF3AC7BEF60C41, 0xD451E48E5C9A5A00, 0x879A858EDE205114 },
+                .y = { 0xD32345065CFD0B21, 0x4D7BEA68794A5062, 0xA4F7B9D729FC3993, 0xE838260E4E5EA446 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xD27EDF795A8F896B, 0xE7CF9E5D5A852846, 0xBA5BE7BD9B86FD86, 0xC1E44A11729FF5C6 },
+                .y = { 0x07CA3E3A1E2649A6, 0x0031203B85096F79, 0xE1DD07026ABC2BB3, 0x06D58594D48CFA00 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x97484C32E4D4B063, 0xBB397E446873506E, 0x233F2018E0C682B4, 0xFF6BCBC968D12590 },
+                .y = { 0x97F470FD2357E496, 0x5C523069BCB4B614, 0xEA33B10EEA506661, 0xC1F96DDF04B09A83 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xB4E88695B28239B9, 0x8C587AC27E74BD40, 0x36D0F005BCA8727A, 0x3632AA737464FBF0 },
+                .y = { 0x568ED6339B369F08, 0x1D89E750C4881E96, 0x41A2B4141BCCEC2D, 0xB961F44AEC598B6C }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x9E57D734C45E9796, 0x153BE80D1AB41BF5, 0xA3E0C36555031CAA, 0x52CF34EBA3294D40 },
+                .y = { 0x17832C7DFF583EBF, 0xAAF7036866E40FAA, 0x19FFE1C87F4B0FA6, 0xACB5D3BD9A663404 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x333F6134CDBB159E, 0x7AABFEA0C814272A, 0xDE5A0A9A7D57774F, 0x480136CA4303F9F2 },
+                .y = { 0x78C8EE22546954E0, 0xBA7407AC301BED93, 0xC21A6ECDC4FEFB70, 0xBB968B77AB9D97C1 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xB7FECB5E72D4ED33, 0x20A22A805165F53A, 0x2CC11D879E158E90, 0x9E9CBA4DBA2CCE03 },
+                .y = { 0x1BBE8B81A018C44B, 0xBC42FEBD20BD77A8, 0x952B4D839CEA765F, 0x64E5294358C0DBE7 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x6224906B6B14F752, 0xED60E71896BB1EE8, 0x55A6C46495B038D9, 0x5FE4AFC1CA840638 },
+                .y = { 0x45959D48303C71E2, 0x946BF974B56967E2, 0x230810899B2DF1C4, 0x84DE53466720AA3F }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x123CD8A509B785F9, 0x856402511EDD29CD, 0xB60E95AC66E9882A, 0xF9107EC90F43CAAA },
+                .y = { 0x8F48FBB98B6601DF, 0x3AFDD0F11CEB4B35, 0x0A804B08F470CEEC, 0x04310217B33D1017 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x80DE24B53267400B, 0xD83306431FF15B83, 0x8A426D98902DD58B, 0x14B9F481EBAB3F60 },
+                .y = { 0x5B1872C0F3497FE8, 0xA6474C9856963F5B, 0xE787E99543EAE2D8, 0x7FD49E25A193C1AE }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xE7319A1604954B44, 0x039C1B75C154A104, 0x58A557005A470317, 0xD3608E5E15E86AF3 },
+                .y = { 0x865B9C5B5925D28D, 0x92F3BDEB2887E5EB, 0x9AD29E49646BFA23, 0x1ABF07CAE2C90EAC }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xA86165F4F9B5F27B, 0x4BD4962B659BFBC6, 0x4E33B3C783F9AC63, 0x0D2E78794EB82E67 },
+                .y = { 0xB02CAC9DA00989F7, 0xB61A26DB43247E6D, 0x79A28B2FDB9165B4, 0x8F2667FD7B74CC84 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x3F21DACBFEEE0D22, 0x38CC5A162867812F, 0xFB482BB8863B12D5, 0x4838F777B417B0F3 },
+                .y = { 0xD0A0163F5403B490, 0xFED783986E3636A5, 0xFED128B6C8164FAA, 0xBC0916804FF653A7 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x11BA0B8158654FEB, 0x83D0C099C40973C6, 0x4ABB178BC0AF37CE, 0x18B621E8BD1662AB },
+                .y = { 0x77F15C29DB878B55, 0x8716F0781BC0B40F, 0x475F05075A27182C, 0xC039BAB46C77B89E }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x99AF5CFEFE873080, 0xBB41A9B517EDEAF0, 0x6448D7BDAC761EA1, 0xCA5DC1A02219AF0A },
+                .y = { 0x7508B4D10BA7DF53, 0x4186F17AE51252D8, 0x009FFD7CAE9A0019, 0x52DE55F86B32112D }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x3E2AF4775E19934D, 0xA1360D72CCD90157, 0x145E370EA7A2008C, 0x8880D5D3F7A42942 },
+                .y = { 0x0245B7E1D7F845B9, 0xF92A24EE36928871, 0xB3E4BF8523E0E22B, 0xDDD7519A30F55150 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xCAB32D59BB31FE40, 0x875CF0F53893EC5B, 0x41A4D820A3D14ECC, 0xCC3023737BB6F782 },
+                .y = { 0xF40F9FAA82E13276, 0x207DE89E8A75C2A6, 0xA3F2483C9D371C05, 0x7D5C6592C8588F2A }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xD6210031576F99A4, 0xD7E7154B163B9D63, 0x9133C728CF47E0A3, 0xD1CFDD457B813E6C },
+                .y = { 0xAA0D60CC3621E569, 0x4C5C914A06FCA960, 0xA915B0F028300A54, 0xE483BF7C9D1BE2C0 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xBFAD3818B7C5AE8A, 0xEFC278A4DB8AD0A0, 0x43B83BD7159B6E9F, 0x0D6905D56096551D },
+                .y = { 0xF73CAB34323069EF, 0x80F4AD4B6EADA798, 0x3893D4A8EF04AD92, 0xA62CFC3FDC7E0D78 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x7CCC0558F0D324E2, 0x6BB494BCDC381B1D, 0xFB0D5D57ADE8BC7A, 0x9D644BDC9594ADCB },
+                .y = { 0xC17EC5D5365A23A1, 0xFD25DF3A6B520566, 0xEAFFF7986956821D, 0xE74029AFD9F20EB3 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x02B8AB7500D22061, 0x6FC8292B00267F28, 0x892717D7B43D01F6, 0x0DB84B08DEAB769A },
+                .y = { 0x7BCE6E253341E324, 0x8498B3130AED2186, 0x3C3E759E1E3A8B1E, 0x413EF0E849E8ECD3 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xCB481253B3FB1E8B, 0xD36F9A078E0BB160, 0xE2B2EDFC58DF0E0F, 0x283A6FE7179F3B33 },
+                .y = { 0xEB1A54D3FCA3E014, 0xFF712727BA72B5F7, 0x5C7DB04331675D87, 0x05D30E7627799B86 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x45922AEDE1B0D9F5, 0xE3CEC6011D52C62F, 0xD9140C37D2CC8869, 0xDEAC1E2583FE435E },
+                .y = { 0xA7F219A5D5065970, 0x14BFD6E7F6EAC893, 0x1C65B6CF87259935, 0xF1F815624409735C }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x67C8850EB64AFDE2, 0x045391631B1F6BDF, 0xC9C5E91AF8850C28, 0x2FFE68B6A1107CEC },
+                .y = { 0xE6BEDBD9F506E874, 0xAD3ED26B139006C3, 0xCFC0DA908ACC335D, 0xAF02C98BA4F8E30D }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xA8D342DEE31AB219, 0x58E56C31231B83B7, 0x588A5AC5357F517D, 0x9FE3ED111FA78892 },
+                .y = { 0x7CE350B93A299F46, 0xB200D300D96EA7B6, 0x13535F43A2ED141B, 0x54598B747335DC58 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x15F1AC7DF0DF4EAE, 0x8BD3EF7EA4EBE0F6, 0xC2090442C3B629D9, 0x7A913332A53686DB },
+                .y = { 0x527F36AC0983407D, 0xBA7959D1E7EF13C8, 0x3140D4B46265B3C3, 0xDE1514090310FB0C }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xA5CF2F53FAE06EBC, 0x03E53EC1989E4964, 0xCF850164CBE3F981, 0x3790D90AB29B5A09 },
+                .y = { 0xFBDFBA2C032F0751, 0xA7614B52DFAB2EC6, 0x0D6285A1E4812729, 0x77117650AA964C7A }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x8FD27479BFC9AF44, 0xE7486D10487A7D3F, 0x0984C449F999C0C9, 0x4F9F8F19C8E2629D },
+                .y = { 0x5C5DBC17FAC5D030, 0x182CB40B1422B6EE, 0xC46AC7E95790637B, 0xF58AFA577BB90B9B }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x7370CDCFEB6F06D6, 0x44AED8C505B860E0, 0x6FDD5F8A955CE458, 0xC902D5CB6C25882D },
+                .y = { 0xA8A4EC69CFE28F37, 0x5E025CD92B44FF84, 0xBCFE87D283B3F249, 0xEF54E3FCF9E8DCE7 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xC04AFA1AE3451A09, 0x7CC69103BC117423, 0x876BE3AA51CF56EE, 0xE7577D57AD844A25 },
+                .y = { 0x266FED8CDB77F341, 0xCFA258DC23AE4A2A, 0x53A7A98CDA782760, 0x04B48868CEAF7D4A }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xDE2E3B75E4A7DE45, 0x43064B46E031EC7D, 0x1E4D655A15C4E268, 0x45F8A63909CDC5EC },
+                .y = { 0xF66F0C9CC2FA2CB9, 0xF3F67CF95A6A27C2, 0x79FF7C51C64E6EAF, 0x13A4FB3A128766B5 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x3015905054F65044, 0xA1A14F9681D9F534, 0x78B310098B92280A, 0x09DD6BFEB313DECF },
+                .y = { 0x8F5C6FB90B2E14E9, 0x031F529A5D5957CE, 0x43D862AD27BA574F, 0x68AF0029E0FBADAC }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x7C112439562BA952, 0xD4A7DAD431D0A8CE, 0x6CBE139277F1B401, 0x8D8A8907D4BD470D },
+                .y = { 0x8224FA8F727866CE, 0x3FB96A11A34A7265, 0x9F872EADBAF2A7A4, 0x2734A68E3FD22F28 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xCD4C1DB9F94DB96E, 0x8FD5AF5A68FB644D, 0x586313669062F6B4, 0x2CED07C4B1EFB9EF },
+                .y = { 0x9D66FA734152C92B, 0x58AAF8B11268ECA6, 0xD2B86F2186E33532, 0x86CBA00E8F8484D9 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xE91BAB76BCC86AD2, 0xA5403F8B9C9CEF95, 0xB963D4F38F067D12, 0x5EFA9E0F0D2793F6 },
+                .y = { 0x86B23BA8A76E5E25, 0xB15BD9E03AFFC453, 0xF6C0AD805776542F, 0x25D026E4145DC30F }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xAAF4C806343CD6D1, 0x84A7C5B2100EDF93, 0x89AE0FA032FEFC3D, 0xB36263414B5E827C },
+                .y = { 0xE7BC798EB3F435F0, 0xCE72303E26434F7E, 0xA39F4BD9B78DD3C7, 0x9EF08279F87E88EB }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x25D4D5B50752E7C6, 0xC3C9DFB325AE272B, 0x480012DA1BC27C04, 0xCAEFFF38ABD77D0F },
+                .y = { 0x95294FF5BF975ACB, 0xDA28F6903BD5F9B9, 0x13E62404489DCA02, 0x9EF2C4917E92271E }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xADB6A52FBC872BB2, 0xF07AE02508B8F1EC, 0x1EBFC86C9D6E5CB1, 0x6C7F3AA129777D4D },
+                .y = { 0x229815FFB1AFED8D, 0x3DCC802477057E03, 0x79C323A4C6D0BAA2, 0x1A5091EE7AE6F52D }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x4C642278CDE85D86, 0x29CAC5DA84AF5D69, 0x2CBF3BEA9FF7A057, 0x3CCF314E05A3ED0D },
+                .y = { 0x4A2CDBC7483911E2, 0xD39202155F0A60E7, 0x4EFF5A871A2DE65B, 0x9D3A9565E4F3D2A1 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x5B193E1FFC72E688, 0x44A6A8B454A3D1FA, 0x639F76312C7EBE4C, 0x1649CDD6C1F93A37 },
+                .y = { 0x3464C93DA334494C, 0xB20AFE655E505E25, 0xC159B1E722146B93, 0xA1778F20449AC9A3 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x4A2E77A8F43DDDCB, 0xEB62EC3F800A4B6B, 0xF99C4406FD357099, 0x293394D37948E690 },
+                .y = { 0xBA27DD7466F61B38, 0xA5B23D71492B02F9, 0x1C98D5943ED6BBD2, 0xEC0D43029E46561C }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x6629D7F2C55F1F8C, 0x63903BB559F69E2D, 0xDCE26A8DB407B541, 0x44A30507143FDFCA },
+                .y = { 0xB78C6A3A888CCD77, 0x6F388CF968303B6C, 0xEEACE5B774177DA0, 0xC8E7F75CDF211DD1 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xE4E632A472F86362, 0x1B7672690157EB61, 0x090DC481CC296977, 0x5B5EB3A4878085C8 },
+                .y = { 0x4562FDA0EA981B91, 0x29C5FB70323A1E1C, 0x497CE7B79EBDAC87, 0xE71B327E45320DD5 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x3D3687774713A3B0, 0x07C98652EB28249C, 0x9F80D4D9027898CC, 0xEA255DF3E3EE9FDB },
+                .y = { 0x75A20DA5F97F0C19, 0x48F3D80DC59DCB31, 0x68AF22B0E13A4370, 0xE3162CAF9D4F5BD6 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x029FC41CA24B5F7F, 0xE94EC19B0801DB99, 0x56BE9E05EE43BDAE, 0xE7E3AF3F6CAD4049 },
+                .y = { 0xBB294C1967AD20AA, 0x185EC50795886469, 0x91BB4ADFB4FBD595, 0xE95F8615820B6D8F }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x414D3313D5C74B93, 0xF14256ECDB6D9A91, 0x3E4FCAB843F2C9EC, 0x14F4959822BA1D4F },
+                .y = { 0xBBF13474AFA4716D, 0xD23899E041976280, 0x8AFC38541C794FA1, 0x4C298B97E78B6E92 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x7F3B4DAB9F6527EF, 0xB131B783E02067F8, 0xE8D5C495BD650082, 0x6782C95213886452 },
+                .y = { 0x20645C0BBE9CD781, 0x50F8B8750ED2C23F, 0x3984D4D2E0115E04, 0x3D9083FB7F4CEB38 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x45FC0B26EC10452F, 0xB1476271D493C214, 0xCA2530DE60B687CA, 0x60D043EC92E2698C },
+                .y = { 0xEE908113C78291BA, 0xFDD6B52801127B81, 0xF1067634F177BE6C, 0x8E6402DA35634326 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xCDA0B99E816307D2, 0x235B7E71554FC52F, 0x986131C757C17902, 0x6E6471BE9E06ABAB },
+                .y = { 0x54ED8CB5C3A40C18, 0xF98ADC48B03CDB83, 0x3B3E520D4E95A091, 0x04409B44B11F94BB }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x19928A29B8E53E43, 0x4BE80DB7B36C8EF6, 0x10463B29CB08AA09, 0x1D0B62C791A932C7 },
+                .y = { 0x445CD7F939A5FAFA, 0xB665A9932F40BD56, 0x3AAD99D70EDF9B74, 0xE6D7A8824990D881 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x451EB127F00DE2E0, 0x3801438C66668D24, 0x3AC0566F68E8EEBF, 0xDF1CC8EB80125E3C },
+                .y = { 0x097156C43DF7D040, 0x820B57B8A2DE2F0A, 0x9B06D77B13BF412B, 0x44063F4F8BA783C7 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x703FBF853E98FB58, 0xA87B6CCEE8B80AFA, 0x90A30510F23B6FBA, 0xC22766F6432811F0 },
+                .y = { 0x373F28F61BDE8EF5, 0xD17FFD32806E6A4A, 0xA42B89C430068FA6, 0x9E6C62BE07EDA291 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x1ABCA512C00A3EC5, 0x2D1AE5BCE1CA0151, 0x1F2283310F9D10A3, 0xAB071EFB460CAED3 },
+                .y = { 0x9AA897239C20D689, 0x78B388A665B9FC54, 0x2BFCBDD786227BE6, 0x93EEE05E46BC72B7 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x8BD3492277990133, 0xB373FC338CC815C9, 0xA4FE77A182353102, 0xBC3255B867929616 },
+                .y = { 0xFF7630F8512D531D, 0xA78B2884B9130124, 0x13057E8097E79200, 0x7F3B98006BA212E2 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x9D5ADF6DEFFD64DE, 0x49B94110F55A405A, 0xB9CF820598C7AF30, 0x60AE7DB922D4F0A6 },
+                .y = { 0x0D0DCB43C7FDECE0, 0x92862F92B4D00AE4, 0x63829E08C1060C6B, 0x02094381461872FC }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xB65A4BAABB782A44, 0x8C3196D484A74E34, 0x6346FD68063508D5, 0x8E6E32877A131723 },
+                .y = { 0x0F62574D0D30B69E, 0xC5D940F2C917518C, 0x2437362838ECDA34, 0x44DC97D1DA193B39 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xCBD7ACCF35FAB9EE, 0x09529F15EACEF129, 0x3EFAB6A0EB1108C0, 0x1DEBE929D4B66F57 },
+                .y = { 0xE22771D982228ED7, 0xB5B95F1768F15B7E, 0x83EF606F45CAC02F, 0x8C4B92FBED6AFB93 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xBDD6F00E639C2ADC, 0xFEF8D99CC4919A7B, 0x814AE4ACFCA979F0, 0xD4857935718ED00D },
+                .y = { 0x533964124C7C1314, 0x7F770121EBFE39EF, 0xD5E399A350D30BD5, 0xA5BF98F1616C4B8E }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x451421F22AAF72BF, 0x26761E7C7A9B0027, 0xEAE044E1E2093C60, 0x5C6E7695B0A990E6 },
+                .y = { 0xBFD9B953BA0C0A27, 0x37F44FBA68FC836A, 0xE0F25AF16C4D82A6, 0x4462AEB6AEAA4ADF }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xF63DEAADD39E14AB, 0xD42EB79D22E1F72B, 0x72EA98532388E45A, 0x7F89A0ACCAB94E0D },
+                .y = { 0x68590B6CAEE245A8, 0x98A487E185C6673E, 0xE1B2E8428175C636, 0x393B93CE1AF41E18 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x1DB2583523BF16C5, 0xB5A45E0240ABFB92, 0x16BBB23C02196EBD, 0xBCA934A223495D10 },
+                .y = { 0x94A3973B97A7A75C, 0x143518B32D419BCC, 0xFC0A6B7162ED0EF6, 0xDF476018E8851937 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xC0F2AFFC4E6916C6, 0x6FB94957811842DA, 0x6034BCB624B4D157, 0xDE2EFDC7992EFB90 },
+                .y = { 0xD66F7ECEAC793C87, 0x02F026267DC6FDCD, 0x90D3235C9AA1C501, 0xF6E494962B4666F0 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x13832C69662E97DA, 0xCD8CE2B4AA2CD727, 0x74F2EB8CCF1A7DC0, 0xF4D7FBBF459A2E53 },
+                .y = { 0x22753CBB1381E6A4, 0x4FC9CE29547B8688, 0x66C734B24CD190E4, 0x4FB516B9734A973F }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x9B3407777334F4F6, 0xCB60B968B7C30F72, 0x5E08A78FA9EF0542, 0x04EC9CD5541CDAC3 },
+                .y = { 0xC0F7BB6F9004D469, 0xFD9EE38723343D3D, 0x429CA212F2D33309, 0xA00D6DA314F9A600 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xA513CB983B07BD14, 0x76498EFF02F03468, 0x2BB7EB63585137D7, 0x0466EA7325CC7B23 },
+                .y = { 0xE01D9523EC7C6299, 0xBC49F32D41571614, 0x060AC38E3E74A6FC, 0x5ED16392001CBAAC }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xD3F4F96DE72446B0, 0xB7B4DE4CFB0A772C, 0x977096050EF6F0BA, 0xE02FE7F37447CA22 },
+                .y = { 0xC993A6D92D03E9E9, 0xD6708A7640B4B0E1, 0xCD0F158CF2F19F15, 0x9F752B4CA4963332 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xE5CA2589F9FF5A7A, 0x240B3B3A785FA633, 0x088DC130660D979A, 0x4B48FE9F2FD3C9EF },
+                .y = { 0xF0AB66CF0F986225, 0xAC9B262A22FA0C9D, 0x8B6B8BAD35B878A2, 0x4C90E8855B895772 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xA330092FB9107999, 0xB5C70CBDE869BD79, 0x94D9C87970D4ECD7, 0xC86F5766F66785F3 },
+                .y = { 0x11C74EA94A26B5F5, 0x5821684637088195, 0xF14D11DEFBA08D49, 0x362032BCDF4CDA7F }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x250F01C420432815, 0x1C3B6728B24F29CC, 0x41ABF76113FFE5EC, 0x84665149FA9D03B8 },
+                .y = { 0x7C35FA68FB0CBD9F, 0xACF49F67338A2FFA, 0xCCF2D7DAE6F143B3, 0x09282B4909DD9C6E }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x247BA12540670316, 0x8882DEC66EB6C8D8, 0x27E647932460F3D0, 0x0D6228CBEF48E6D2 },
+                .y = { 0x2EE59F048366B808, 0x782617376145F266, 0xBCD1212DDBBC6F13, 0xB08AB30442EB62B1 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x350BE567C85AB647, 0x60E10C8687D73937, 0x79D77D795F87004B, 0xF5CDF52EB3B8B82F },
+                .y = { 0x654AD701064CBBBD, 0x41387D8FF1A840D2, 0xA6C5054585CA177E, 0x75A4DE7BBB4B88B4 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x4A31E9F64EFBF1A7, 0xBB8FEC39F4736405, 0xEE1D3C5E438B8062, 0x7B9CFBCCC244354D },
+                .y = { 0x9A56751ABD09DDD9, 0xA87DC2641BD72BCB, 0xA768A58795CB96EC, 0x65F535444C759476 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x3A56282911B747EB, 0xBCB17625D2D249F0, 0x666ACB6E14B47DD9, 0xECDF63C461EAEA54 },
+                .y = { 0x38AB47F80659F519, 0x9DE92E9C26F1A072, 0xD570F6614DA11B20, 0x58E417C8EF2D5FCD }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x4A98A9642370E842, 0xBE8996E48F5CA2F6, 0x24C81FD19D7AE446, 0x129B5D2931B44D03 },
+                .y = { 0x7D0A23202A1C7A67, 0x5F3636F091602C76, 0x008A81B6808CE04D, 0xE74F152014885164 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xA479D917EB6F2DBA, 0x5D1289B7E40B2B70, 0x6A7D668925E5CB18, 0x3729037F1BC7D5FB },
+                .y = { 0x5FD8C5D2D8CC97B6, 0x158B57083ACAA787, 0x3E5693AC79C08449, 0xD0AE7AED159916A5 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x4AD7A92184226BA5, 0xC7A5BF443DC076DE, 0x1CDAA0D8FE7C9285, 0x1A2985E4052491CA },
+                .y = { 0x90A4E8B070674605, 0x6CBE43990A098549, 0xCC5965E599344899, 0xFDB20094F69C12BF }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x7DFBB6C0A6DF520E, 0xE39533BB4DDD1E84, 0xBE25AAC1F44653C5, 0x4B65D579209241F9 },
+                .y = { 0xEDB34F5F8648AD7A, 0x2674B77EABBDA12A, 0x0989B17423EAD44D, 0xBD0FA4C5C49A183A }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x9B6130A2FD52CED4, 0x9BC0B8B65D50773E, 0xDD08F94F9BFCC8DB, 0xDD33197CED190168 },
+                .y = { 0x3062B5C707F21414, 0x7244234E19839DDB, 0x630F6AD89877267C, 0xB283DDCDC868A7D3 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x716D2C381AC9656D, 0x3861AC24658C8D98, 0x705C516EE9250D94, 0x948CEDA6B1571FAE },
+                .y = { 0x4FC7B2B0DB5EE109, 0xFBC80EFC281089B5, 0x2BA6730F4CD7F66A, 0x87BCAF9D4D71912B }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x63A9BC7D3A498EB9, 0xF60F191997D8C7BE, 0xFECACBC4B6DBC431, 0x396AF8D83FD00704 },
+                .y = { 0x1C36FB779464C88C, 0x468C66D35F8680F0, 0xE78C84982043D81C, 0x2B37F5D369C7B867 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xCDD121A7A4DA0512, 0x4EF507BBAA5303F6, 0xB84ECD021BBE5F09, 0xDA80BF3C3EDA0ED0 },
+                .y = { 0xE834CF7977207AEF, 0xACA637503F15BF97, 0x110E4295C3DE245A, 0xF7CC3BD56DD117E0 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xA7AF8E4734CCC663, 0x20C9A897682F7D41, 0x3870B0F837EF19F1, 0xEDED7BC1E519FFB1 },
+                .y = { 0x905C86797A21CB77, 0x9084CBABDC04D028, 0xAE60D0CF5AD98998, 0x35BA23C81B9596A7 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x687CC90C9EBEC0D7, 0xA094AF091E29C51B, 0xB288D3500F5FAE25, 0x85EF1CE3404A9373 },
+                .y = { 0xA4B6EE055E671536, 0x7886A321066FCBFC, 0x6CE84B2F9541E5E1, 0xDB6ECCAF85419D49 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x57BD77337ACD508D, 0x9C024F50B91548BE, 0x6074DC7CECE4D991, 0x7AB0D5AECD2D11F9 },
+                .y = { 0x3854452591209734, 0x01C3371F8DCC74CD, 0xE5FB91080D0F927B, 0x1BA64389D5D3DA01 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x928B83F56A7928E3, 0x9A98AD7498BE85A6, 0x6AB45D6008B33F84, 0x4BDFC8C269C75813 },
+                .y = { 0xC25DDA94FE42B52B, 0x52D96987AB58CF4E, 0x90CD76F5261F4A14, 0x3958E9F734A8E2D6 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xA0DF5ABD29EC25A5, 0x3D6AFE1C77FD4DA3, 0xFEB9380A819EE1F1, 0xA47565134CA4D7D3 },
+                .y = { 0xA52F7FA87957613B, 0x0E94D629282E7C91, 0x3B6E9532B18809F1, 0x2CEA67452AA7DE65 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xF87BC5AD5F28C781, 0xF1D84A3AC6FA266A, 0x16A11DA19E8B432D, 0x4882444F6746EB37 },
+                .y = { 0x5BF07C383C7010FB, 0xB55D9DBAB5A9F97F, 0x1C0CE37547CD166B, 0xE0796E9576678B23 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x0A043E1155FAB314, 0x9F121C10B824D9F3, 0x4BEFE512EC2DB24C, 0xBD3D653355F729C4 },
+                .y = { 0x6738DB7DF2324331, 0x07A955CE0CBEFC37, 0xDF5C57FAF8005551, 0xBC5F920224706FF7 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xBC572366625FCDCF, 0x99854DCCD0125229, 0x636FED139A845606, 0x31DCC27C1A32AB23 },
+                .y = { 0xC1BB6B28D0C74D67, 0x8CF9F549B7F2DB89, 0x53FA58B2C5973373, 0xCB4C852A2E55F478 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x2A9ED7BCD8836938, 0x086043F30B99311E, 0xE05CD307DA30E587, 0xB97C3B7E9FC2A9F3 },
+                .y = { 0xFBE028CA00674769, 0xBA85AB376431C73D, 0xAC45401F6739B406, 0x0628114B7FA80BCE }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xF9F5D6235E0833B4, 0xC645535A3EEC934F, 0x17DFEF4891905168, 0x73DF276609157684 },
+                .y = { 0x17A22C379E58CC1F, 0x52B52CDD5508F08D, 0xE1C4006A8A37B4F5, 0x693D2FB981E5C936 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x68EEB05C536EF09D, 0x173CF2009A275A9C, 0xE718700961E02EC7, 0x940135C391BE32D4 },
+                .y = { 0x860CE33695664FE9, 0x29C3183DDD54CF61, 0xA79F076579040585, 0xB545572B7B3F4E6F }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x70AD14E478A414B2, 0x52B72E920CBAA1D8, 0x10EDD1EAB6BB6FDB, 0x12ACBA6FFD78C821 },
+                .y = { 0x8FDB75E81458FA14, 0xC423D4209DEE8C5E, 0x9A8463F594B6104A, 0x2FDE2BE6CCEE9BE8 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x082736D19C0859C3, 0x89EA5516B269386A, 0xF25071871AA87B33, 0xE9D82F5F704E8236 },
+                .y = { 0x7834612442E855F5, 0x209F50FE395E00D8, 0xCD9E03AAE6E7E62B, 0xB4B4959E5E5BE37B }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xD342772BA208937E, 0x314AB8B270A558CC, 0xB2B0ECEE615717A3, 0x8D0B9DB03DD54A93 },
+                .y = { 0x15209B1771A6DB88, 0x33C8931C58A1AFE7, 0x79E3B6E4EC4EC6D8, 0x67EFBE60EF1F485D }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x4D263443971F3773, 0xE70E6F8A4D973639, 0xDB8D8DE11DC86C56, 0x194F9E9D7A8CBA58 },
+                .y = { 0x78A2E8E166388D73, 0x054CA393B8651216, 0x9C5F486CC530BD5A, 0x0E54D13E13904B84 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x28F1C5850749F50F, 0x132386A41E5B1F5B, 0xAB78AEC2BA5FF74A, 0x711754A9E7586D35 },
+                .y = { 0xC2385603C92D5178, 0x5BF37C09F346333D, 0x4207C33A2D8DA734, 0xF1A7AB09F4C09CE8 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xF172E50E27A27759, 0x0466858B79166B11, 0xE486273B48311F07, 0x3CE42AE188AC9629 },
+                .y = { 0x2306C81296B19775, 0xD137DDBF918A6C62, 0xE13A7015A3BFD511, 0xA879BE93EC454A39 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xC481BB9A9C7C0B4A, 0x026D81BEB30F0A99, 0x41392AD87A1B381B, 0xD44754A5B15579F6 },
+                .y = { 0xB02E68377D8F660A, 0x6ADD4477DBC8D5B4, 0x3B4EFE824D66BCEC, 0x78964C0109D0DCA3 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x4494D526E270A325, 0x08A3D0DCBF1FE4FB, 0xADA2423B850117F6, 0x213056F6CA8D6CD8 },
+                .y = { 0xFCAF0B7831EC0AB1, 0xE94CDC1468B8E1BE, 0xAA48DCAF2FEE3A84, 0xA5286EFE5E381227 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xD14A7D4ED85221E5, 0xE4C19C52BC99037B, 0x2FC47AA11E9AC3F7, 0x72FFFF6CC750EB1C },
+                .y = { 0x85E5C154B5ACF60E, 0x70A430A674CE0518, 0x7675DC40E5BE466A, 0x04C20577C4DD37C5 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xAD77F062500491E6, 0xFC24B431EC0FB1EE, 0x9D85430CAE7B23BD, 0x094FCC9452BD0200 },
+                .y = { 0xE7CBB1E827730025, 0x52DCA27580144561, 0xFB17EF2BCC164683, 0x24B0A95F5091CDD8 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x1CF4BC889E301AD0, 0xA7944FB957CB0179, 0xCC61F9607EC4DA1C, 0x50285056CF7320CD },
+                .y = { 0x5F28F104D2915739, 0xC5455E159924620B, 0x8AF71A68C220710F, 0xCC37F43F6BEEEF82 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x07DB3583B607426F, 0x126BE356FEACD8DF, 0x9CC4831273D39F83, 0x201E9C715D638449 },
+                .y = { 0x7F3AB6E44D5DEF15, 0x68F5BC2D21F4191E, 0xAD42A3ADC8AB2213, 0x3382771774CFAB42 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x2C19D407951C9DAE, 0x26F6677560B1F6A6, 0xE28FF62755E0A043, 0x62A5DD6C6D0A0E81 },
+                .y = { 0xA7410810A33F4118, 0xA66DADF9C0EEA589, 0x099ACD6994D9DFF5, 0xB163484C4B773ED6 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x0D0D00A8D5F14EF1, 0xD3323A58BFE11E01, 0x3B3ED4D421672FCC, 0x0A30AE004F09069A },
+                .y = { 0x2E0B384EF484ECAC, 0x187FF7CCD2B39D4D, 0xAA3F6715B8F4F60D, 0xDAC73188CD3F7856 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xB3626B376A14ABF2, 0xDAD486944800400D, 0xDF0F9EAA420C372C, 0x66E06BC387C49165 },
+                .y = { 0xA8EC8D58D43ACE09, 0xC70AFA05BD88BDC6, 0x02C3EA7530406B65, 0x34D831E2567AF8C0 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xBB74A206C676351E, 0xAB27710488E6DD11, 0xFB2AAD507C945318, 0xEF1F2CE432BB9757 },
+                .y = { 0xAE769BE603C8087B, 0x00117AF0FAD30EDD, 0xE4A6CA108B2D37DA, 0xBAE1579F854979BA }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xDDFFB87CD2EA70B4, 0xA8A308276BFB1C75, 0x3FC8F84507D345F7, 0xA3C8220107C99374 },
+                .y = { 0xE3861A478E52C633, 0xA3FA73352F93120D, 0xB86B05B93165ED5C, 0xC03F5880B306733D }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x85CC1158D295A458, 0x52625915A81821F7, 0xEAE65A00DABF3D08, 0x8567E0492D2DB6D9 },
+                .y = { 0xF6C9D65B3565303B, 0x3928349BA7CB419F, 0x4AA7CD7A1275714C, 0x921EF60BEC0FDCDA }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x57AB12A3984E3FDC, 0x239AC554A6F45AA0, 0x602AD857B33FACE5, 0x8B5281C23A403957 },
+                .y = { 0x94E5C07608EAE36A, 0x6DA18F730DC9BC05, 0x0623FBB15AD7D1CB, 0x4EEEC087883D0A20 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x1F27A611E7BC8667, 0x2489AEB49458D3E4, 0x0E21C27F12D1D599, 0x0395C94A86208F32 },
+                .y = { 0xBF1BD26A1D9D25F7, 0x168E66D7DE284B48, 0x6A4216FED1544F97, 0x74F30713748E4B3B }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x89563B16E5EB7376, 0x66E222F7902E6580, 0x81B721C8AAD80C7F, 0xCBF9A33475DD4FA6 },
+                .y = { 0x868C6A6448415259, 0x3D98F8AE3CB46440, 0xD1FEA41D1CDF5428, 0xAF04660861BAF8CA }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x0622879A83C1FAD5, 0xE039051912FBBB42, 0xF18C5AE5C27C3BF2, 0xD037C06E4C24AB07 },
+                .y = { 0x915C9290A68B535A, 0xE9D952E657EDA658, 0xC8D5627287AE0511, 0xC51175B0FD1AA47C }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x8B1CA80ABFAAA237, 0xA50CF163C75F7CDF, 0xE6B2ACC791B00B68, 0x7228E388634880B1 },
+                .y = { 0x587AB652445C587E, 0x6DD44E83D2F8E1B1, 0x713B2F6EEDDC8968, 0xF726F0528A0A053B }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x7B94DF7BF5309B27, 0xBFD4B86E048AE38F, 0x25399CBC1B82F5BC, 0x0FCF8F88FA78A208 },
+                .y = { 0x405E8F18CA16B171, 0x7C570C5258BE96BB, 0xA9F56CA5A12C0010, 0x7D8E2A1A7336F7C5 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xB6EEC90DD7AC2B21, 0x247CBA7A8C6D3B2C, 0x61ED6B9D1D8E3318, 0x902A5E7D7F736944 },
+                .y = { 0x1D880838D4192BF2, 0x23420A8A984AD887, 0x5C1890F6DC485297, 0x901EC12C8D708602 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xE1B3B137B3E0835A, 0x554F462FD1B856B5, 0x33E575046FB893CC, 0x016FC35F3722667A },
+                .y = { 0xC61BBAC1F8741724, 0x9CE209AEEE8F132C, 0xEDE009E2ED448442, 0xC186D9223DAFFB5C }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x73574DAA9AAFA426, 0x9947DE6D58A4AA0A, 0x917355BF343F4F94, 0x40FF8852A0794F94 },
+                .y = { 0x04A7835EF6B226DC, 0x93B55BBD1BB763FE, 0xA3578393E08B0053, 0x7181A69F82EF44FD }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x9F7C68BF19D45325, 0xF2BB95309643D151, 0xD88C04AFC7D91075, 0x71ABD7E12B97D542 },
+                .y = { 0x697CA7CBE77C22F1, 0x170802A003FD9CE6, 0x801FB17343FB54AC, 0xED5B60FEA94E416F }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x53C55500D5A12003, 0x159930C6C157FC81, 0x89A73FB5C90926C8, 0x9D7F42388B54E950 },
+                .y = { 0x37C3E7616D95D509, 0x323DA0A871D5A1A1, 0xB4DDBC782B9CCE10, 0x2B585AED6F4B006A }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x3C2764182EA9459D, 0x9F5D44DFB05E63C9, 0x682DD5973B6A8689, 0x23AF67AED4DF7389 },
+                .y = { 0xB42DED60E2CA1387, 0xA2113346B5970584, 0x1F99B0C7C809A897, 0x164D0D0E60301B7D }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x97DC759973EE3A46, 0x37772BD58CB5A5BE, 0x85A3F3A483A17E4A, 0xFB4941415324B823 },
+                .y = { 0x672A65542CF3D3D9, 0x7D10AABC28CA9CA5, 0xF7B308E923C80C39, 0x62667900CB32E3FD }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x29DB9607B67310D3, 0xF8598A3EB7180215, 0xD0EFAEDD76AA99EA, 0xC1549563AD0FDB0D },
+                .y = { 0xAD350DF8BC39E126, 0x4559CB14DA6B2D48, 0xE34526FDC8316F2F, 0x846E46969EF2A951 }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0xE111F348C06526E3, 0x03A1B36D48C557C1, 0x75100EF697E0FA40, 0x5AAB7F880A0DA5F9 },
+                .y = { 0x08F5BAB01DEA81EB, 0x8D834FB052309BEF, 0xC0ACDFC5134422D5, 0xB7B5E68517DF49AE }
+        }
+,
+        {
+                .generator_index = 0, .infinity = 0,
+                .x = { 0x486D8FFA696946FC, 0x50FBC6D8B9CBA56D, 0x7E3D423E90F35A15, 0x7C3DA195C0DD962C },
+                .y = { 0xE673FDB03CFD5D8B, 0x0704B7C2889DFCA5, 0xF6CE581FF52305AA, 0x399D49EB914D5E53 }
+        }
+        #endif
+};
+#endif
+#endif
 

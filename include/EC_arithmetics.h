@@ -41,32 +41,107 @@ typedef struct point_coord_native{
         0x00000001, 0x00000000, 0x00000000, 0xFFFFFFFF, \
         0xFFFFFFFF, 0xFFFFFFFF, 0xFFFFFFFE, 0x00000000
 #elif (SCALAR_WORD_SIZE == 64)
-#define P_PRIME 0x0000000000000001ULL
+#define P_PRIME_0 0x0000000000000001ULL
 #define P_WORDS \
         0xFFFFFFFFFFFFFFFFULL, 0x00000000FFFFFFFFULL, \
         0x0000000000000000ULL, 0xFFFFFFFF00000001ULL
 #define P_MINUS_2_WORDS \
         0xFFFFFFFFFFFFFFFDULL, 0x00000000FFFFFFFFULL, \
         0x0000000000000000ULL, 0xFFFFFFFF00000001ULL
-#define P_A \
+#define P_A_WORDS \
         0xFFFFFFFFFFFFFFFCULL, 0x00000000FFFFFFFFULL, \
         0x0000000000000000ULL, 0xFFFFFFFF00000001ULL
 #define P_R2_WORDS \
         0x0000000000000003ULL, 0xFFFFFFFBFFFFFFFFULL, \
-        0xFFFFFFFF00000000ULL, 0x00000004FFFFFFFDULL
+        0xFFFFFFFFFFFFFFFEULL, 0x00000004FFFFFFFDULL
 #define P_A_MONTGOMERY_WORDS \
         0xFFFFFFFCFFFFFFFFULL, 0x0000000000000003ULL, \
         0x0000000000000000ULL, 0xFFFFFFFFFFFFFFFCULL
 #define P_B_MONTGOMERY_WORDS \
-        0xD89CDF62ACF005CDULL, 0xE5A220AB04874834ULL, \
-        0xDC30061D29C4BDDFULL, 0xF7212ED6E5A220ABULL
+        0xD89CDF6229C4BDDFULL, 0xACF005CD78843090ULL, \
+        0xE5A220ABF7212ED6ULL, 0xDC30061D04874834ULL
 #define P_R_MONTGOMERY_WORDS \
-        0x0000000000000001ULL, 0xFFFFFFFFFFFFFFFFULL, \
-        0xFFFFFFFFFFFFFFFFULL, 0xFFFFFFFEFFFFFFFFULL
+        0x0000000000000001ULL, 0xFFFFFFFF00000000ULL, \
+        0xFFFFFFFFFFFFFFFFULL, 0x00000000FFFFFFFEULL
+#endif
+#elif SECURITY_LEVEL == 256
+#if (SCALAR_WORD_SIZE == 32)
+#define P_PRIME_0 0x00000001
+#define P_WORDS \
+        0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, \
+        0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, \
+        0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, \
+        0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, \
+        0x000001ff, 0x00000000
+#define P_MINUS_2_WORDS \
+        0xfffffffd, 0xffffffff, 0xffffffff, 0xffffffff, \
+        0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, \
+        0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, \
+        0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, \
+        0x000001ff, 0x00000000
+#define P_A_WORDS \
+        0xfffffffc, 0xffffffff, 0xffffffff, 0xffffffff, \
+        0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, \
+        0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, \
+        0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, \
+        0x000001ff, 0x00000000
+#define P_R2_WORDS \
+        0x00000000, 0x00000000, 0x00000000, 0x00004000, \
+        0x00000000, 0x00000000, 0x00000000, 0x00000000, \
+        0x00000000, 0x00000000, 0x00000000, 0x00000000, \
+        0x00000000, 0x00000000, 0x00000000, 0x00000000, \
+        0x00000000, 0x00000000
+#define P_A_MONTGOMERY_WORDS \
+        0xffffffff, 0xfe7fffff, 0xffffffff, 0xffffffff, \
+        0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, \
+        0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, \
+        0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff, \
+        0x000001ff, 0x00000000
+#define P_B_MONTGOMERY_WORDS \
+        0xae586387, 0x8014654f, 0xea35a81f, 0x78f7a28f, \
+        0xc41e961a, 0x839ab9ef, 0x5e9dd8df, 0xbd8b2960, \
+        0xa8f63f49, 0xf0ab0c9c, 0xc8c77884, 0xf9dc5a44, \
+        0x2dccd98a, 0x77516d39, 0xd05b42a0, 0x0fc94d10, \
+        0x0000004d, 0x00000000
+#define P_R_MONTGOMERY_WORDS \
+        0x00000000, 0x00800000, 0x00000000, 0x00000000, \
+        0x00000000, 0x00000000, 0x00000000, 0x00000000, \
+        0x00000000, 0x00000000, 0x00000000, 0x00000000, \
+        0x00000000, 0x00000000, 0x00000000, 0x00000000, \
+        0x00000000, 0x00000000
+#elif (SCALAR_WORD_SIZE == 64)
+#define P_PRIME_0 0x0000000000000001ULL
+#define P_WORDS \
+        0xFFFFFFFFFFFFFFFFULL, 0xFFFFFFFFFFFFFFFFULL, 0xFFFFFFFFFFFFFFFFULL, 0xFFFFFFFFFFFFFFFFULL, \
+        0xFFFFFFFFFFFFFFFFULL, 0xFFFFFFFFFFFFFFFFULL, 0xFFFFFFFFFFFFFFFFULL, 0xFFFFFFFFFFFFFFFFULL, \
+        0x00000000000001FFULL
+#define P_MINUS_2_WORDS \
+        0xFFFFFFFFFFFFFFFDULL, 0xFFFFFFFFFFFFFFFFULL, 0xFFFFFFFFFFFFFFFFULL, 0xFFFFFFFFFFFFFFFFULL, \
+        0xFFFFFFFFFFFFFFFFULL, 0xFFFFFFFFFFFFFFFFULL, 0xFFFFFFFFFFFFFFFFULL, 0xFFFFFFFFFFFFFFFFULL, \
+        0x00000000000001FFULL
+#define P_A_WORDS \
+        0xFFFFFFFFFFFFFFFCULL, 0xFFFFFFFFFFFFFFFFULL, 0xFFFFFFFFFFFFFFFFULL, 0xFFFFFFFFFFFFFFFFULL, \
+        0xFFFFFFFFFFFFFFFFULL, 0xFFFFFFFFFFFFFFFFULL, 0xFFFFFFFFFFFFFFFFULL, 0xFFFFFFFFFFFFFFFFULL, \
+        0x00000000000001FFULL
+#define P_R2_WORDS \
+        0x0000000000000000ULL, 0x0000400000000000ULL, 0x0000000000000000ULL, 0x0000000000000000ULL, \
+        0x0000000000000000ULL, 0x0000000000000000ULL, 0x0000000000000000ULL, 0x0000000000000000ULL, \
+        0x0000000000000000ULL
+#define P_A_MONTGOMERY_WORDS \
+        0xfe7fffffffffffffULL, 0xffffffffffffffffULL, 0xffffffffffffffffULL, 0xffffffffffffffffULL, \
+        0xffffffffffffffffULL, 0xffffffffffffffffULL, 0xffffffffffffffffULL, 0xffffffffffffffffULL, \
+        0x00000000000001FFULL
+#define P_B_MONTGOMERY_WORDS \
+        0x8014654fae586387, 0x78f7a28fea35a81f, 0x839ab9efc41e961a, 0xbd8b29605e9dd8df, \
+        0xf0ab0c9ca8f63f49, 0xf9dc5a44c8c77884, 0x77516d392dccd98a, 0x0fc94d10d05b42a0, \
+        0x000000000000004d
+#define P_R_MONTGOMERY_WORDS \
+        0x0080000000000000ULL, 0x0000000000000000ULL, 0x0000000000000000ULL, 0x0000000000000000ULL, \
+        0x0000000000000000ULL, 0x0000000000000000ULL, 0x0000000000000000ULL, 0x0000000000000000ULL, \
+        0x0000000000000000ULL
 #endif
 #endif
 
-#if SECURITY_LEVEL == 128
 extern const point_coord_native P_NATIVE;
 extern const point_coord_native P_PRIME_NATIVE;
 extern const point_coord_native P_R2_NATIVE;
@@ -76,7 +151,6 @@ extern const point_coord_native P_B_MONTGOMERY;
 extern const point_coord_native P_R_MONTGOMERY;
 extern const point_coord_native P_A_MONTGOMERY;
 extern const point_coord_native P_A;
-#endif
 
 /** EC point in Jacobian coordinates.
  *

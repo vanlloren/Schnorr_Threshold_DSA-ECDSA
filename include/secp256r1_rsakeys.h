@@ -5,6 +5,10 @@
 #ifndef SCHNORR_THRESHOLD_DSA_ECDSA_SECP256R1_RSAKEYS_H
 #define SCHNORR_THRESHOLD_DSA_ECDSA_SECP256R1_RSAKEYS_H
 
+#ifndef SECURITY_LEVEL
+#define SECURITY_LEVEL 128
+#endif
+
 #include <stddef.h>
 
 #ifndef SECP256R1_ARG_NONNULL
@@ -15,8 +19,12 @@
 #endif
 #endif
 
-#define RSA3072_CIPHERTEXT_SIZE   (384)  // Output 3072-bit (384 byte)
+#define RSA3072_CIPHERTEXT_SIZE   (384) // Output 3072-bit (384 byte)
+#if SECURITY_LEVEL == 128
 #define RSA3072_PLAINTEXT_SIZE     (32)  // Max plaintext (256 bit / 32 byte)
+#elif SECURITY_LEVEL == 256
+#define RSA3072_PLAINTEXT_SIZE     (66)  // Max plaintext (512 bit / 64 byte)
+#endif
 #define RSA3072_PUBLIC_KEY_SIZE   (400) // Valore pulito, sicuro e ottimizzato
 
 typedef struct evp_pkey_st EVP_PKEY;

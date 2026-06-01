@@ -2,6 +2,10 @@
 // Created by PC on 09/04/2026.
 //
 
+#ifndef SECURITY_LEVEL
+#define SECURITY_LEVEL 128
+#endif
+
 #ifndef SCHNORR_THRESHOLD_DSA_ECDSA_GPAPI_H
 #define SCHNORR_THRESHOLD_DSA_ECDSA_GPAPI_H
 
@@ -13,10 +17,16 @@
 #ifndef NONCE_SIZE_BYTES
 #define NONCE_SIZE_BYTES 32
 #endif
-#endif
-
 #ifndef HASH_DIGEST_LENGTH
 #define HASH_DIGEST_LENGTH 32
+#endif
+#elif SECURITY_LEVEL == 256
+#ifndef NONCE_SIZE_BYTES
+#define NONCE_SIZE_BYTES 66
+#endif
+#ifndef HASH_DIGEST_LENGTH
+#define HASH_DIGEST_LENGTH 64
+#endif
 #endif
 
 /* ========================================================================
@@ -245,9 +255,9 @@ void hash_spec(uint8_t digest[HASH_DIGEST_LENGTH],
 
     xof_shake_update(&csprng_state, &counter, 1);
 
-    const uint64_t nonce_len = NONCE_SIZE_BYTES;
+    const uint64_t nonce_len = SCALAR_SIZE;
     xof_shake_update(&csprng_state, (const uint8_t *)&nonce_len, sizeof(nonce_len));
-    xof_shake_update(&csprng_state, nonce, NONCE_SIZE_BYTES);
+    xof_shake_update(&csprng_state, nonce, SCALAR_SIZE);
 
     xof_shake_update(&csprng_state,(const uint8_t *)&mlen,sizeof (mlen));
     xof_shake_update(&csprng_state,m,mlen);
@@ -297,7 +307,8 @@ WARN_UNUSED_RESULT int commit_scalar(
  * by checking that it is less than the group order.
  */
 WARN_UNUSED_RESULT int rejection_sampling_q(
-        const unsigned char *scalar
+        const unsigned char *scalar,
+        uint32_t scalar_len
 ) ARG_NONNULL(1);
 
 
