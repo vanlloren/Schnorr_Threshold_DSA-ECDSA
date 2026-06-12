@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  recovery_server:
+    build: .
+    container_name: recovery_container
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - .:/app
+    stdin_open: true
+    tty: true
+    command: >
+      bash -c "
+      tc qdisc del dev eth0 root 2>/dev/null || true &&
+      tc qdisc add dev eth0 root netem delay 2ms 0.5ms distribution normal &&
+      exec bash
+      "
+
+  user_client_1:
+    build: .
+    container_name: user1_container
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - .:/app
+    stdin_open: true
+    tty: true
+    command: >
+      bash -c "
+      tc qdisc del dev eth0 root 2>/dev/null || true &&
+      tc qdisc add dev eth0 root netem delay 2ms 0.5ms distribution normal &&
+      exec bash
+      "
+
+  user_client_2:
+    build: .
+    container_name: user2_container
+    cap_add:
+      - NET_ADMIN
+    volumes:
+      - .:/app
+    stdin_open: true
+    tty: true
+    command: >
+      bash -c "
+      tc qdisc del dev eth0 root 2>/dev/null || true &&
+      tc qdisc add dev eth0 root netem delay 2ms 0.5ms distribution normal &&
+      exec bash
+      "
