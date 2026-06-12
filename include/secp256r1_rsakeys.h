@@ -10,6 +10,9 @@
 #endif
 
 #include <stddef.h>
+#include <openssl/evp.h>
+#include <openssl/rsa.h>
+#include <openssl/x509.h>
 
 #ifndef SECP256R1_ARG_NONNULL
 #if defined(__GNUC__) || defined(__clang__)
@@ -19,13 +22,22 @@
 #endif
 #endif
 
-#define RSA3072_CIPHERTEXT_SIZE   (384) // Output 3072-bit (384 byte)
 #if SECURITY_LEVEL == 128
-#define RSA3072_PLAINTEXT_SIZE     (32)  // Max plaintext (256 bit / 32 byte)
+/* --- LIVELLO DI SICUREZZA 128 BIT (Standard RSA-3072) --- */
+#define RSA_KEY_BITS              3072
+#define RSA_CIPHERTEXT_SIZE       (384)  // Output 3072-bit (384 byte)
+#define RSA_PLAINTEXT_SIZE        (32)   // Max plaintext richiesto (256 bit / 32 byte)
+#define RSA_PUBLIC_KEY_SIZE       (400)  // Struttura della chiave pubblica ottimizzata
+
 #elif SECURITY_LEVEL == 256
-#define RSA3072_PLAINTEXT_SIZE     (66)  // Max plaintext (512 bit / 64 byte)
+/* --- LIVELLO DI SICUREZZA 256 BIT (Standard RSA-15360) --- */
+    #define RSA_KEY_BITS              15360
+    #define RSA_CIPHERTEXT_SIZE       (1920) // Output 15360-bit (1920 byte)
+    #define RSA_PLAINTEXT_SIZE        (66)   // Max plaintext richiesto (512 bit + padding / 66 byte)
+    #define RSA_PUBLIC_KEY_SIZE       (1950) // Valore proporzionale e ottimizzato per l'header ASN.1 / X.509
+#else
+    #error "SECURITY_LEVEL non supportato o non definito correttamente (accetta solo 128 o 256)"
 #endif
-#define RSA3072_PUBLIC_KEY_SIZE   (400) // Valore pulito, sicuro e ottimizzato
 
 typedef struct evp_pkey_st EVP_PKEY;
 
@@ -99,7 +111,8 @@ int secp256r1_rsa_public_key_serialize(
  */
 int secp256r1_rsa_public_key_parse(
         EVP_PKEY **pubkey_out,
-        const unsigned char *input
+        const unsigned char *input,
+        size_t input_len
 ) SECP256R1_ARG_NONNULL(1) SECP256R1_ARG_NONNULL(2);
 
 #endif //SCHNORR_THRESHOLD_DSA_ECDSA_SECP256R1_RSAKEYS_H

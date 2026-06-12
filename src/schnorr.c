@@ -447,23 +447,23 @@ int schnorr_keygen_phase2(
     }
 
     // Encrypt Shamir shares for recovery party
-    unsigned char ciphertext[RSA3072_CIPHERTEXT_SIZE];
+    unsigned char ciphertext[RSA_CIPHERTEXT_SIZE];
     recovery_packet->generator_index = generator_index;
 
-    size_t encrypted_len1 = RSA3072_CIPHERTEXT_SIZE;
+    size_t encrypted_len1 = RSA_CIPHERTEXT_SIZE;
     if (!secp256r1_rsa_encrypt(ciphertext, enc_pubkey, sam_sec_share_y_3_i->value, &encrypted_len1)) {
         return 0;
     }
-    memcpy(recovery_packet->encrypted_y_3i, ciphertext, RSA3072_CIPHERTEXT_SIZE);
+    memcpy(recovery_packet->encrypted_y_3i, ciphertext, RSA_CIPHERTEXT_SIZE);
 
-    memset(ciphertext, 0, RSA3072_CIPHERTEXT_SIZE);
+    memset(ciphertext, 0, RSA_CIPHERTEXT_SIZE);
 
-    size_t encrypted_len2 = RSA3072_CIPHERTEXT_SIZE;
+    size_t encrypted_len2 = RSA_CIPHERTEXT_SIZE;
     if (!secp256r1_rsa_encrypt(ciphertext, enc_pubkey, sam_sec_share_array[2].value, &encrypted_len2)) {
         return 0;
     }
-    memcpy(recovery_packet->encrypted_y_i3, ciphertext, RSA3072_CIPHERTEXT_SIZE);
-    memset(ciphertext, 0, RSA3072_CIPHERTEXT_SIZE);
+    memcpy(recovery_packet->encrypted_y_i3, ciphertext, RSA_CIPHERTEXT_SIZE);
+    memset(ciphertext, 0, RSA_CIPHERTEXT_SIZE);
 
     return 1;
 }
@@ -1108,7 +1108,9 @@ int schnorr_pubkey_combine(
 
 int schnorr_prove_knowledge(
         point_extended *u,
+        point_extended *h,
         private_secret_scalar *r,
+        schnorr_reduced_shamir_shares *schnorr_seckey,
         CSPRNG_STATE_T *csprng_state,
         uint8_t generator_index
 ){
@@ -1128,6 +1130,19 @@ int schnorr_prove_knowledge(
         return 0;
     }
     if (!point_ge_serialize(u, &temp_u_ge)) {
+        return 0;
+    }
+
+    //compute h = schnorr_seckey * G
+    point_gej temp_h_gej;
+    if (!point_gej_scalar_mult_base(&temp_h_gej, &schnorr_seckey->scalar)) {
+        return 0;
+    }
+    point_ge temp_h_ge;
+    if (!point_gej_to_ge(&temp_h_ge, &temp_h_gej)) {
+        return 0;
+    }
+    if (!point_ge_serialize(h, &temp_h_ge)) {
         return 0;
     }
 
@@ -1440,7 +1455,7 @@ int schnorrsig_verify(
     unsigned char recomputed_chall[ECDSA_SCHNORR_SIGNATURE_E_SIZE];
     memcpy(recomputed_chall, tmp_hash, ECDSA_SCHNORR_SIGNATURE_E_SIZE);
 
-    printf("Recomputed challenge: ");
+    //printf("Recomputed challenge: ");
     // compare recomputed_chall with sig->e
     if (memcmp(recomputed_chall, sig->e, ECDSA_SCHNORR_SIGNATURE_E_SIZE) != 0) {
         return 0;
@@ -1632,10 +1647,10 @@ int recovery_info_decrypt(
     memcpy(pubkey, &recovery_info->pubkey, sizeof(schnorr_pubkey));
 
     // Recovery decrypts
-    unsigned char decrypted_y_1_3[RSA3072_PLAINTEXT_SIZE];
-    unsigned char decrypted_y_3_1[RSA3072_PLAINTEXT_SIZE];
-    unsigned char decrypted_y_2_3[RSA3072_PLAINTEXT_SIZE];
-    unsigned char decrypted_y_3_2[RSA3072_PLAINTEXT_SIZE];
+    unsigned char decrypted_y_1_3[RSA_PLAINTEXT_SIZE];
+    unsigned char decrypted_y_3_1[RSA_PLAINTEXT_SIZE];
+    unsigned char decrypted_y_2_3[RSA_PLAINTEXT_SIZE];
+    unsigned char decrypted_y_3_2[RSA_PLAINTEXT_SIZE];
 
     if(!secp256r1_rsa_decrypt(
             decrypted_y_1_3,
@@ -1667,10 +1682,10 @@ int recovery_info_decrypt(
     }
 
     //put the values correctly into the structure
-    memcpy(out_share_arr[0].value, decrypted_y_1_3, RSA3072_PLAINTEXT_SIZE);
-    memcpy(out_share_arr[1].value, decrypted_y_3_1, RSA3072_PLAINTEXT_SIZE);
-    memcpy(out_share_arr[2].value, decrypted_y_2_3, RSA3072_PLAINTEXT_SIZE);
-    memcpy(out_share_arr[3].value, decrypted_y_3_2, RSA3072_PLAINTEXT_SIZE);
+    memcpy(out_share_arr[0].value, decrypted_y_1_3, RSA_PLAINTEXT_SIZE);
+    memcpy(out_share_arr[1].value, decrypted_y_3_1, RSA_PLAINTEXT_SIZE);
+    memcpy(out_share_arr[2].value, decrypted_y_2_3, RSA_PLAINTEXT_SIZE);
+    memcpy(out_share_arr[3].value, decrypted_y_3_2, RSA_PLAINTEXT_SIZE);
 
     return 1;
 }
@@ -1691,4 +1706,44 @@ int collect_random_seed(
     }
 
     return 1;
+}
+
+int schnorr_compute_signature_nonce(
+        point_extended *R,
+        const point_extended *r_i_array,
+        uint8_t n_signers
+){
+    point_ge r_i_tmp;
+    point_gej r_i_gej_tmp;
+    point_ge r_other_tmp;
+    point_gej r_other_gej_tmp;
+    point_gej sum_tmp;
+    point_ge sum_ge_tmp;
+
+
+    if(!point_ge_parse(&r_i_tmp, &r_i_array[0])){
+        return 0;
+    }
+    if(!point_ge_to_gej(&r_i_gej_tmp, &r_i_tmp)){
+        return 0;
+    }
+
+    if(!point_ge_parse(&r_other_tmp, &r_i_array[1])){
+        return 0;
+    }
+    if(!point_ge_to_gej(&r_other_gej_tmp, &r_other_tmp)){
+        return 0;
+    }
+
+    if(!point_gej_add(&sum_tmp, &r_i_gej_tmp, &r_other_gej_tmp)){
+        return 0;
+    }
+
+    if(!point_gej_to_ge(&sum_ge_tmp, &sum_tmp)){
+        return 0;
+    }
+
+    if(!point_ge_serialize(R, &sum_ge_tmp)){
+        return 0;
+    }
 }

@@ -97,7 +97,7 @@
 #define POINT_SIZE (1 + 66 + 66) // generator_index + uncompressed point
 #define HALF_POINT_SIZE (1 + 66) // generator_index + x-only point
 #define MAX_COMMITMENT_SIZE (POINT_SIZE) // Max size for committed data (e.g., uncompressed point)
-#define CIPHERTEXT_SIZE (384) // currently RSA 3072-bit output  ->>>> TO MODIFY
+#define CIPHERTEXT_SIZE (1920) // currently RSA 3072-bit output  ->>>> TO MODIFY
 #define RECOVERY_PACKET_SIZE (1 + (2 * CIPHERTEXT_SIZE) + (2 * (1 + (POINT_SIZE) + SCALAR_SIZE + SCALAR_SIZE + (POINT_SIZE))))
 #define COMMITMENT_BUFFER_SIZE (64)
 #define SCALAR_BUFFER_SIZE (67)
@@ -337,11 +337,19 @@ typedef struct protocol_context{
     point_extended ec_points_array[2];
     commitment_packet commitment_packets[2];
     CSPRNG_STATE_T csprng_state;
+    commitment_packet other_commitment_packets[2]; // commitment packets ricevuti dagli altri player per la Phase 1
 
     // Output della Phase 2
     keygen_shamir_secret_share sam_sec_share_array[3]; // y_{i_1}, y_{i_2}, y_{i_3}
-    point_extended M_i;                                // m_i * G
+    point_extended M_i;     // m_i * G
+    point_extended other_M_i; // M_i ricevuto dagli altri player per la Phase 2
     keygen_recovery_packet recovery_packet;            // Packet per il recovery party
+    keygen_shamir_secret_share other_shamir_share;
+    point_extended other_A;
+    point_extended other_Y_3;
+    keygen_recovery_packet other_recovery_packet; // recovery packet ricevuto dagli altri player per la Phase 4
+
+
 
     //Output della Phase 3
     schnorr_seckey schnorr_seckey; // chiave privata omega per le firme Schnorr
@@ -556,7 +564,9 @@ WARN_UNUSED_RESULT int schnorr_shamir_shares_reduction(
  */
 WARN_UNUSED_RESULT int schnorr_prove_knowledge(
         point_extended *u,
+        point_extended *h,
         private_secret_scalar *r,
+        schnorr_reduced_shamir_shares *schnorr_seckey,
         CSPRNG_STATE_T *csprng_state,
         uint8_t generator_index
 ) ARG_NONNULL(1) ARG_NONNULL(2) ARG_NONNULL(3);
@@ -987,5 +997,18 @@ WARN_UNUSED_RESULT int recovery_info_decrypt(
  WARN_UNUSED_RESULT int collect_random_seed(
         unsigned char *seed
 ) ARG_NONNULL(1);
+
+ /** Sums the pieces r_i to compute the total hash nonce R for the signature.
+  *
+  * Returns: 0 if the arguments are invalid or the computation fails. 1 otherwise.
+  * Args:
+  * Out:     R: pointer to a point_extended structure to be filled with the computed nonce R for the signature.
+  * In:      r_i_array: pointer to an array of point_extended structures containing the r_i values from each signer.
+  */
+ WARN_UNUSED_RESULT int schnorr_compute_signature_nonce(
+         point_extended *R,
+         const point_extended *r_i_array,
+         uint8_t n_signers
+) ARG_NONNULL(1) ARG_NONNULL(2);
 
 #endif // SCHNORR_H
